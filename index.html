@@ -47,7 +47,8 @@ showAdj();
 // Часы ПК и телефона не совпадают. ПК пишет c — момент записи по своим часам; разница часов =
 // наименьшее (момент чтения по нашим часам − c) среди свежих записей: чем быстрее прочли, тем точнее.
 let samples = [], diff = null;
-let player = null, ready = false, state = null, loadedId = null, seekAt = 0, lastNew = 0, catching = false;
+let player = null, ready = false, state = null, loadedId = null, seekAt = 0, lastNew = 0;
+let playingSince = 0, recent = [], justSeeked = false, lead = parseFloat(localStorage.getItem('snd-lead') || '0.2');
 
 let polling = false;
 async function poll() {
@@ -61,7 +62,7 @@ async function poll() {
     if (!d || !d.v || !d.n) { if (!state) say('Жду видео с компьютера…'); return; }
     if (!state || d.n !== state.n || d.c !== state.c) {
       samples.push((t0 + t1) / 2 - d.c);
-      if (samples.length > 40) samples.shift();
+      if (samples.length > 120) samples.shift();
       diff = Math.min(...samples);
       state = d;
       lastNew = Date.now();
@@ -94,23 +95,33 @@ function tick() {
     if (ps === 1 || ps === 3) player.pauseVideo();
     if (Math.abs(player.getCurrentTime() - tgt) > 0.5) player.seekTo(Math.max(0, tgt), true);
     player.setPlaybackRate(state.r || 1);
+    playingSince = 0;
     say('Пауза на компьютере.');
     return;
   }
   if (ps !== 1 && ps !== 3) player.playVideo();
-  if (ps !== 1) { say('Загрузка…'); return; }
-  const d = tgt - player.getCurrentTime();  // > 0 — телефон отстаёт
+  if (ps !== 1) { say('Загрузка…'); playingSince = 0; return; }
+  if (!playingSince) playingSince = Date.now();
   const base = state.r || 1;
-  if (Math.abs(d) > 2) {
-    if (Date.now() - seekAt > 4000) { player.seekTo(tgt + 0.3, true); seekAt = Date.now(); }
-  } else if (Math.abs(d) > (catching ? 0.03 : 0.08)) {
-    catching = true;
-    player.setPlaybackRate(base + (d > 0 ? 0.25 : -0.25));  // плавно догоняем без перемотки
-  } else {
-    catching = false;
-    player.setPlaybackRate(base);
+  if (player.getPlaybackRate() !== base) player.setPlaybackRate(base);
+  // Скорость не трогаем (у YouTube шаг 0.25 — слышно, как звук ускоряется и замедляется).
+  // Расхождение берём средним из 3 замеров; больше 0.25 с — одна точная перемотка, не чаще раза в 8 с.
+  const d = tgt - player.getCurrentTime();  // > 0 — телефон отстаёт
+  if (Date.now() - playingSince < 1500) { recent = []; return; }  // после перемотки/загрузки — дать разыграться
+  if (justSeeked) {  // насколько промахнулась прошлая перемотка — учесть в следующей
+    lead = Math.min(1.5, Math.max(0, lead + d * 0.7));
+    localStorage.setItem('snd-lead', lead);
+    justSeeked = false;
   }
-  say('Звук идёт. Расхождение ' + Math.abs(d).toFixed(2) + ' с.' +
+  recent.push(d);
+  if (recent.length > 3) recent.shift();
+  const avg = recent.reduce((a, b) => a + b, 0) / recent.length;
+  const far = Math.abs(d) > 2 && Date.now() - seekAt > 3000;  // перемотали на ПК — догнать сразу
+  if (far || (recent.length === 3 && Math.abs(avg) > 0.25 && Date.now() - seekAt > 8000)) {
+    player.seekTo(Math.max(0, target() + lead), true);
+    seekAt = Date.now(); playingSince = 0; recent = []; justSeeked = !far;
+  }
+  say('Звук идёт. Расхождение ' + Math.abs(avg).toFixed(2) + ' с.' +
       (Date.now() - lastNew > 20000 ? ' (давно нет вестей с компьютера)' : ''));
 }
 
