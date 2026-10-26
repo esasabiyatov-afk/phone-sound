@@ -7,6 +7,7 @@
 <style>
   body { font: 17px sans-serif; margin: 0; padding: 16px; background: #111; color: #eee; text-align: center; }
   button { font-size: 22px; padding: 18px 28px; border-radius: 12px; border: 0; background: #2b7; color: #fff; margin: 16px 0; }
+  #adj button { font-size: 16px; padding: 10px 14px; margin: 4px; background: #345; }
   #player-box { max-width: 480px; margin: 12px auto; aspect-ratio: 16/9; }
   #player-box iframe { width: 100%; height: 100%; }
   #status { color: #aaa; font-size: 15px; min-height: 2.5em; }
@@ -20,6 +21,11 @@
   <button id="start">Включить звук</button>
   <div id="status">Нажмите кнопку — звук пойдёт вслед за видео на компьютере.</div>
   <div id="player-box"><div id="player"></div></div>
+  <div id="adj" hidden>
+    <button id="later">Звук спешит</button>
+    <button id="earlier">Звук отстаёт</button>
+    <div class="hint">Поправка: <span id="adj-val">0.0</span> с</div>
+  </div>
   <div class="hint">Не выключайте экран телефона — иначе звук остановится.</div>
 </div>
 <script>
@@ -30,27 +36,47 @@ document.getElementById(key ? 'main' : 'no-key').hidden = false;
 const statusEl = document.getElementById('status');
 const say = t => statusEl.textContent = t;
 
-// Поправка часов: точное время = Date.now() + offset (замер с самым коротким ответом)
-let offset = 0;
-async function syncClock() {
-  let best = null;
-  for (let i = 0; i < 5; i++) {
-    try {
-      const t0 = Date.now();
-      const r = await fetch('https://time.akamai.com/?ms&_=' + t0, { cache: 'no-store' });
-      const server = parseFloat(await r.text()) * 1000;
-      const t1 = Date.now();
-      if (!best || t1 - t0 < best.rtt) best = { rtt: t1 - t0, offset: server - (t0 + t1) / 2 };
-    } catch (e) {}
-  }
-  if (best) offset = best.offset;
-}
-const now = () => Date.now() + offset;
+// Ручная поправка (если звук всё же чуть расходится с картинкой), запоминается на телефоне
+let adj = parseFloat(localStorage.getItem('snd-adj') || '0');
+function showAdj() { document.getElementById('adj-val').textContent = (adj > 0 ? '+' : '') + adj.toFixed(1); }
+function setAdj(d) { adj = Math.round((adj + d) * 10) / 10; localStorage.setItem('snd-adj', adj); showAdj(); }
+document.getElementById('earlier').onclick = () => setAdj(0.1);
+document.getElementById('later').onclick = () => setAdj(-0.1);
+showAdj();
 
-let player = null, ready = false, state = null, loadedId = null, seekAt = 0, lastMsg = 0, catching = false;
+// Часы ПК и телефона не совпадают. ПК пишет c — момент записи по своим часам; разница часов =
+// наименьшее (момент чтения по нашим часам − c) среди свежих записей: чем быстрее прочли, тем точнее.
+let samples = [], diff = null;
+let player = null, ready = false, state = null, loadedId = null, seekAt = 0, lastNew = 0, catching = false;
+
+let polling = false;
+async function poll() {
+  if (polling) return;
+  polling = true;
+  const t0 = Date.now();
+  try {
+    const r = await fetch('https://api.npoint.io/' + encodeURIComponent(key) + '?_=' + t0, { cache: 'no-store' });
+    const d = await r.json();
+    const t1 = Date.now();
+    if (!d || !d.v || !d.n) { if (!state) say('Жду видео с компьютера…'); return; }
+    if (!state || d.n !== state.n || d.c !== state.c) {
+      samples.push((t0 + t1) / 2 - d.c);
+      if (samples.length > 40) samples.shift();
+      diff = Math.min(...samples);
+      state = d;
+      lastNew = Date.now();
+      tick();
+    }
+  } catch (e) {
+    say('Нет связи, пробую ещё…');
+  } finally {
+    polling = false;
+  }
+}
 
 function target() {
-  return state.s ? state.p + (now() - state.t) / 1000 * (state.r || 1) : state.p;
+  const pcNow = Date.now() - diff;  // «сейчас» по часам ПК
+  return (state.s ? state.p + (pcNow - state.c) / 1000 * (state.r || 1) : state.p) + adj;
 }
 
 function tick() {
@@ -58,7 +84,7 @@ function tick() {
   const tgt = target();
   if (loadedId !== state.v) {
     loadedId = state.v;
-    player.loadVideoById({ videoId: state.v, startSeconds: tgt });
+    player.loadVideoById({ videoId: state.v, startSeconds: Math.max(0, tgt) });
     seekAt = Date.now();
     if (!state.s) setTimeout(() => player.pauseVideo(), 1500);
     return;
@@ -66,7 +92,7 @@ function tick() {
   const ps = player.getPlayerState();  // 1 — идёт, 2 — пауза, 3 — загрузка
   if (!state.s) {
     if (ps === 1 || ps === 3) player.pauseVideo();
-    if (Math.abs(player.getCurrentTime() - tgt) > 0.5) player.seekTo(tgt, true);
+    if (Math.abs(player.getCurrentTime() - tgt) > 0.5) player.seekTo(Math.max(0, tgt), true);
     player.setPlaybackRate(state.r || 1);
     say('Пауза на компьютере.');
     return;
@@ -85,41 +111,27 @@ function tick() {
     player.setPlaybackRate(base);
   }
   say('Звук идёт. Расхождение ' + Math.abs(d).toFixed(2) + ' с.' +
-      (Date.now() - lastMsg > 150000 ? ' (давно нет вестей с компьютера)' : ''));
-}
-
-function listen() {
-  const es = new EventSource('https://ntfy.sh/' + encodeURIComponent(key) + '/sse?since=latest');
-  es.onmessage = ev => {
-    try {
-      const m = JSON.parse(ev.data);
-      if (m.event !== 'message') return;
-      state = JSON.parse(m.message);
-      lastMsg = Date.now();
-      tick();
-    } catch (e) {}
-  };
-  es.onerror = () => say('Нет связи, переподключаюсь…');
+      (Date.now() - lastNew > 20000 ? ' (давно нет вестей с компьютера)' : ''));
 }
 
 document.getElementById('start').onclick = async () => {
   document.getElementById('start').hidden = true;
+  document.getElementById('adj').hidden = false;
   say('Подключаюсь…');
   try { await navigator.wakeLock.request('screen'); } catch (e) {}
   document.addEventListener('visibilitychange', async () => {
     if (document.visibilityState === 'visible') { try { await navigator.wakeLock.request('screen'); } catch (e) {} }
   });
-  await syncClock();
-  setInterval(syncClock, 10 * 60 * 1000);
   player = new YT.Player('player', {
     playerVars: { playsinline: 1, controls: 0, disablekb: 1 },
     events: {
-      onReady: () => { ready = true; player.unMute(); player.setVolume(100); say('Жду видео с компьютера…'); tick(); },
+      onReady: () => { ready = true; player.unMute(); player.setVolume(100); tick(); },
       onError: e => say('YouTube не даёт играть это видео на другом сайте (ошибка ' + e.data + ').')
     }
   });
-  listen();
+  setInterval(poll, 700);
   setInterval(tick, 1000);
+  poll();
 };
 </script>
 <script src="https://www.youtube.com/iframe_api"></script>
