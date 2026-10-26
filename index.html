@@ -12,6 +12,7 @@
   #player-box iframe { width: 100%; height: 100%; }
   #status { color: #aaa; font-size: 15px; min-height: 2.5em; }
   .hint { color: #888; font-size: 14px; }
+  [hidden] { display: none !important; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
 </head>
@@ -21,6 +22,7 @@
 <div id="main" hidden>
   <button id="start">Включить звук</button>
   <div id="status">Нажмите кнопку — звук пойдёт вслед за видео на компьютере.</div>
+  <button id="open-yt" hidden>Открыть в приложении YouTube</button>
   <div id="player-box"><div id="player"></div></div>
   <video id="vid" playsinline preload="auto" hidden></video>
   <div id="adj" hidden>
@@ -47,7 +49,7 @@ document.getElementById('later').onclick = () => setAdj(-0.1);
 showAdj();
 
 // Два плеера с одинаковыми действиями: YouTube (видео по id) и обычный video (фильм с другого сайта по адресу потока)
-let ytPlayer = null, ytReady = false;
+let ytPlayer = null, ytReady = false, ytBlocked = false;
 const yt = {
   ready: () => ytReady,
   load(id, t, play) {
@@ -143,13 +145,14 @@ function tick() {
   const src = state.v || state.u;
   if (loadedSrc !== src) {
     loadedSrc = src;
+    ytBlocked = false; document.getElementById('open-yt').hidden = true;
     if (P !== want) { if (P) P.show(false); P = want; P.show(true); }
     // до нажатия кнопки видео только подготавливаем — чтобы по нажатию сразу включить его (iPhone иначе не даёт)
     P.load(src, Math.max(0, target()), started && state.s);
     seekAt = Date.now(); playingSince = 0; recent = [];
     return;
   }
-  if (!started) return;
+  if (!started || (P === yt && ytBlocked)) return;  // видео запрещено к показу — сообщение не затираем
   const tgt = target(), ps = P.state(), base = state.r || 1;
   if (!state.s) {
     if (ps !== 'stop') P.pause();
@@ -203,11 +206,24 @@ window.onYouTubeIframeAPIReady = () => {
     playerVars: { playsinline: 1, controls: 0, disablekb: 1 },
     events: {
       onReady: () => { ytReady = true; tick(); },
-      onError: e => say('YouTube не даёт играть это видео на другом сайте (ошибка ' + e.data + ').')
+      onError: ytError
     }
   });
 };
+function ytError(e) {
+  // 101/150 — автор запретил показ на других сайтах: обойти нельзя, предлагаем открыть в приложении YouTube
+  if (e.data === 101 || e.data === 150) {
+    ytBlocked = true;
+    say('Автор этого видео запретил показ на других сайтах — синхронно звук не пойдёт. ' +
+        'Можно открыть его в приложении YouTube с того же места (пауза и перемотка тогда — вручную).');
+    document.getElementById('open-yt').hidden = false;
+  } else say('YouTube не даёт играть это видео (ошибка ' + e.data + ').');
+}
 if (key) { setInterval(poll, 700); setInterval(tick, 1000); poll(); }
+
+document.getElementById('open-yt').onclick = () => {
+  if (state && state.v) location.href = 'https://www.youtube.com/watch?v=' + state.v + '&t=' + Math.floor(Math.max(0, target())) + 's';
+};
 
 document.getElementById('start').onclick = () => {
   started = true;
