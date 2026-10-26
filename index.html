@@ -121,7 +121,7 @@ function tick() {
     player.seekTo(Math.max(0, target() + lead), true);
     seekAt = Date.now(); playingSince = 0; recent = []; justSeeked = !far;
   }
-  say('Звук идёт. Расхождение ' + Math.abs(avg).toFixed(2) + ' с.' +
+  say('Звук идёт: «' + ((player.getVideoData() || {}).title || '') + '». Расхождение ' + Math.abs(avg).toFixed(2) + ' с.' +
       (Date.now() - lastNew > 20000 ? ' (давно нет вестей с компьютера)' : ''));
 }
 
