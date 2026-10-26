@@ -45,10 +45,10 @@ document.getElementById('later').onclick = () => setAdj(-0.1);
 showAdj();
 
 // Часы ПК и телефона не совпадают. ПК пишет c — момент записи по своим часам; разница часов =
-// наименьшее (момент чтения по нашим часам − c) среди свежих записей: чем быстрее прочли, тем точнее.
+// наименьшее (момент получения по нашим часам − c) среди свежих записей: чем быстрее прочли, тем точнее.
 let samples = [], diff = null;
 let player = null, ready = false, state = null, loadedId = null, seekAt = 0, lastNew = 0;
-let playingSince = 0, recent = [], justSeeked = false, lead = parseFloat(localStorage.getItem('snd-lead') || '0.2');
+let playingSince = 0, stuckSince = 0, recent = [], justSeeked = false, lead = parseFloat(localStorage.getItem('snd-lead') || '0.2');
 
 let polling = false;
 async function poll() {
@@ -61,7 +61,9 @@ async function poll() {
     const t1 = Date.now();
     if (!d || !d.v || !d.n) { if (!state) say('Жду видео с компьютера…'); return; }
     if (!state || d.n !== state.n || d.c !== state.c) {
-      samples.push((t0 + t1) / 2 - d.c);
+      // берём момент получения ответа (t1), а не середину запроса: так разница часов не выходит меньше
+      // настоящей и звук не убегает вперёд картинки (на мобильном интернете запрос долгий и неровный)
+      samples.push(t1 - d.c);
       if (samples.length > 120) samples.shift();
       diff = Math.min(...samples);
       state = d;
@@ -100,7 +102,14 @@ function tick() {
     return;
   }
   if (ps !== 1 && ps !== 3) player.playVideo();
-  if (ps !== 1) { say('Загрузка…'); playingSince = 0; return; }
+  if (ps !== 1) {
+    // телефон может не дать включить видео сам (особенно iPhone) — тогда нужно одно касание по видео
+    if (!stuckSince) stuckSince = Date.now();
+    say(ps !== 3 && Date.now() - stuckSince > 3000 ? '👇 Коснитесь видео ниже один раз — телефон не даёт включить его сам.' : 'Загрузка…');
+    playingSince = 0;
+    return;
+  }
+  stuckSince = 0;
   if (!playingSince) playingSince = Date.now();
   const base = state.r || 1;
   if (player.getPlaybackRate() !== base) player.setPlaybackRate(base);
