@@ -47,7 +47,7 @@ async function syncClock() {
 }
 const now = () => Date.now() + offset;
 
-let player = null, ready = false, state = null, loadedId = null, seekAt = 0, lastMsg = 0;
+let player = null, ready = false, state = null, loadedId = null, seekAt = 0, lastMsg = 0, catching = false;
 
 function target() {
   return state.s ? state.p + (now() - state.t) / 1000 * (state.r || 1) : state.p;
@@ -77,9 +77,11 @@ function tick() {
   const base = state.r || 1;
   if (Math.abs(d) > 2) {
     if (Date.now() - seekAt > 4000) { player.seekTo(tgt + 0.3, true); seekAt = Date.now(); }
-  } else if (Math.abs(d) > 0.12) {
+  } else if (Math.abs(d) > (catching ? 0.03 : 0.08)) {
+    catching = true;
     player.setPlaybackRate(base + (d > 0 ? 0.25 : -0.25));  // плавно догоняем без перемотки
   } else {
+    catching = false;
     player.setPlaybackRate(base);
   }
   say('Звук идёт. Расхождение ' + Math.abs(d).toFixed(2) + ' с.' +
