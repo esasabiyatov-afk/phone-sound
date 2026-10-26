@@ -49,6 +49,7 @@ showAdj();
 let samples = [], diff = null;
 let player = null, ready = false, state = null, loadedId = null, seekAt = 0, lastNew = 0;
 let playingSince = 0, stuckSince = 0, recent = [], justSeeked = false, lead = parseFloat(localStorage.getItem('snd-lead') || '0.2');
+let started = false;
 
 let polling = false;
 async function poll() {
@@ -87,11 +88,14 @@ function tick() {
   const tgt = target();
   if (loadedId !== state.v) {
     loadedId = state.v;
-    player.loadVideoById({ videoId: state.v, startSeconds: Math.max(0, tgt) });
+    // до нажатия кнопки видео только подготавливаем — чтобы по нажатию сразу включить его (iPhone иначе не даёт)
+    if (!started) player.cueVideoById({ videoId: state.v, startSeconds: Math.max(0, tgt) });
+    else player.loadVideoById({ videoId: state.v, startSeconds: Math.max(0, tgt) });
     seekAt = Date.now();
-    if (!state.s) setTimeout(() => player.pauseVideo(), 1500);
+    if (started && !state.s) setTimeout(() => player.pauseVideo(), 1500);
     return;
   }
+  if (!started) return;
   const ps = player.getPlayerState();  // 1 — идёт, 2 — пауза, 3 — загрузка
   if (!state.s) {
     if (ps === 1 || ps === 3) player.pauseVideo();
@@ -134,24 +138,33 @@ function tick() {
       (Date.now() - lastNew > 20000 ? ' (давно нет вестей с компьютера)' : ''));
 }
 
-document.getElementById('start').onclick = async () => {
-  document.getElementById('start').hidden = true;
-  document.getElementById('adj').hidden = false;
-  say('Подключаюсь…');
-  try { await navigator.wakeLock.request('screen'); } catch (e) {}
-  document.addEventListener('visibilitychange', async () => {
-    if (document.visibilityState === 'visible') { try { await navigator.wakeLock.request('screen'); } catch (e) {} }
-  });
+// Плеер и опрос запускаем сразу при открытии страницы, а видео включаем прямо в нажатии кнопки:
+// iPhone разрешает звук только тому видео, которое включили касанием — тогда второе касание не нужно.
+window.onYouTubeIframeAPIReady = () => {
+  if (!key) return;
   player = new YT.Player('player', {
     playerVars: { playsinline: 1, controls: 0, disablekb: 1 },
     events: {
-      onReady: () => { ready = true; player.unMute(); player.setVolume(100); tick(); },
+      onReady: () => { ready = true; if (started) { player.unMute(); player.setVolume(100); } tick(); },
       onError: e => say('YouTube не даёт играть это видео на другом сайте (ошибка ' + e.data + ').')
     }
   });
   setInterval(poll, 700);
   setInterval(tick, 1000);
   poll();
+};
+
+document.getElementById('start').onclick = () => {
+  started = true;
+  if (ready) { player.unMute(); player.setVolume(100); player.playVideo(); }
+  document.getElementById('start').hidden = true;
+  document.getElementById('adj').hidden = false;
+  say('Подключаюсь…');
+  try { navigator.wakeLock.request('screen').catch(() => {}); } catch (e) {}
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { try { navigator.wakeLock.request('screen').catch(() => {}); } catch (e) {} }
+  });
+  tick();
 };
 </script>
 <script src="https://www.youtube.com/iframe_api"></script>
