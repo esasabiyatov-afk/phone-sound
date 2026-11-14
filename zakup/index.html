@@ -1,0 +1,2077 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<title>Zakup.KG</title>
+<meta name="theme-color" content="#FFFFFF">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Zakup.KG">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<style>body{margin:0;padding:0}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+button,.chip,.tab{-webkit-user-select:none;user-select:none}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+/* Один телефон по центру, экраны меняются слайдом. Светлая тема намеренно: так выглядит само приложение. */
+:root{
+  --green:#15803D; --green-dark:#166534; --green-bg:#E8F5EC;
+  --bg:#F5F6F4; --card:#FFFFFF; --soft:#F1F2EF; --line:#E6E7E3; --border:#D9DBD6;
+  --text:#18181B; --muted:#5B6168; --page:#E3E6E0;
+  --warn:#B4410C; --warn-bg:#FFF4EC; --amber:#8A5A12; --amber-bg:#FBF3E6;
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);font-family:var(--font);color:var(--text);overflow:hidden}
+button,input,textarea{font-family:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid #2B6CB0;outline-offset:2px}
+
+/* Переключатель ролей: внизу экрана входа, как «Тест 1 / Тест 2» */
+.demo-roles{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}
+.demo-roles .linkbtn{color:var(--muted);font-weight:600}
+
+/* Приложение на весь экран */
+.phone{position:fixed;inset:0;background:var(--bg);overflow:hidden}
+
+/* Экраны и переходы */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);will-change:transform}
+.screen[hidden]{display:none!important}
+.screen.in-right{animation:inRight .38s cubic-bezier(.2,.8,.2,1) both}
+.screen.out-left{animation:outLeft .38s cubic-bezier(.2,.8,.2,1) both}
+.screen.in-left{animation:inLeft .38s cubic-bezier(.2,.8,.2,1) both}
+.screen.out-right{animation:outRight .38s cubic-bezier(.2,.8,.2,1) both;z-index:2}
+.screen.fade-in{animation:fadeIn .3s ease both}
+@keyframes inRight{from{transform:translateX(100%)}to{transform:none}}
+@keyframes outLeft{from{transform:none}to{transform:translateX(-28%);filter:brightness(.92)}}
+@keyframes inLeft{from{transform:translateX(-28%);filter:brightness(.92)}to{transform:none}}
+@keyframes outRight{from{transform:none}to{transform:translateX(100%)}}
+@keyframes fadeIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}
+
+/* Появление карточек лесенкой */
+.screen.anim .rise{animation:rise .45s cubic-bezier(.2,.8,.2,1) both}
+.screen.anim .rise:nth-child(2){animation-delay:.05s}
+.screen.anim .rise:nth-child(3){animation-delay:.1s}
+.screen.anim .rise:nth-child(4){animation-delay:.15s}
+.screen.anim .rise:nth-child(5){animation-delay:.2s}
+.screen.anim .rise:nth-child(6){animation-delay:.25s}
+@keyframes rise{from{opacity:.001;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* Блоки */
+.top{background:var(--card);padding:calc(26px + env(safe-area-inset-top, 0px)) 16px 16px;display:flex;flex-direction:column;gap:14px;flex-shrink:0}
+.body{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding:16px;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+.card{background:var(--card);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.muted{color:var(--muted)} .small{font-size:13px} .xs{font-size:12px}
+.h1{font-size:22px;font-weight:800;text-wrap:balance} .h2{font-size:17px;font-weight:700}
+.name{font-size:15px;font-weight:600} .bold{font-weight:700}
+.price{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.warn{color:var(--warn);font-weight:600}
+.divider{height:1px;background:var(--line)}
+.pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.pill.warn{color:var(--warn);background:var(--warn-bg)}
+.pill.green{color:var(--green);background:var(--green-bg)}
+.pill.amber{color:var(--amber);background:var(--amber-bg)}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.thumb{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.thumb .ic{width:24px;height:24px;stroke-width:1.8}
+.icon-btn{width:44px;height:44px;border-radius:22px;border:none;background:var(--soft);display:flex;align-items:center;justify-content:center;color:var(--text)}
+
+.btn{height:40px;padding:0 14px;border-radius:12px;border:none;background:var(--green);color:#fff;font-size:14px;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:transform .12s,background .2s}
+.btn:hover{background:var(--green-dark)}
+.btn:active,.supplier:active,.chip:active,.tab:active,.icon-btn:active,.product:active{transform:scale(.96)}
+.btn.ghost{background:var(--soft);color:var(--text)}
+.btn.lg{height:54px;border-radius:16px;font-size:17px;font-weight:800;width:100%}
+.btn.white{background:var(--card);color:var(--text)}
+.btn.done{background:var(--green-bg);color:var(--green)}
+
+.search{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:14px;background:var(--soft);color:var(--muted)}
+.search input{flex:1;border:none;background:transparent;font-size:16px;outline:none;min-width:0}
+
+.dot{width:8px;height:8px;border-radius:4px;background:var(--warn);display:inline-block;position:relative}
+.dot::after{content:"";position:absolute;inset:0;border-radius:4px;background:var(--warn);animation:ping 1.6s ease-out infinite}
+@keyframes ping{from{transform:scale(1);opacity:.6}to{transform:scale(2.8);opacity:0}}
+
+/* Таб-бар */
+.tabbar{height:calc(72px + env(safe-area-inset-bottom, 0px));padding-bottom:env(safe-area-inset-bottom, 0px);background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));flex-shrink:0;position:relative}
+.tab{border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:11px;font-weight:600;transition:color .2s,transform .12s;position:relative}
+.tab.on{color:var(--green);font-weight:700}
+.tab .badge-n{position:absolute;top:10px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--warn);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.tab .badge-n.pop{animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+
+/* Товары */
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.product{background:var(--card);border-radius:18px;padding:10px;display:flex;flex-direction:column;gap:8px;border:none;text-align:left;transition:transform .12s}
+.product .img{height:96px;border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative}
+.product .img .ic{width:36px;height:36px;stroke-width:1.6}
+.badge{position:absolute;top:8px;left:8px;font-size:11px;font-weight:800;background:var(--green);color:#fff;padding:3px 8px;border-radius:999px}
+
+/* Поставщики */
+.supplier{text-align:left;background:var(--card);border:2px solid var(--card);border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;width:100%;transition:border-color .2s,transform .12s}
+.supplier.on{border-color:var(--green)}
+.radio{width:22px;height:22px;border-radius:11px;border:2px solid #A3A8AE;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .2s}
+.radio::after{content:"";width:12px;height:12px;border-radius:6px;background:var(--green);transform:scale(0);transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.supplier.on .radio{border-color:var(--green)}
+.supplier.on .radio::after{transform:scale(1)}
+.stepper{display:flex;align-items:center;gap:14px}
+.stepper button{width:44px;height:44px;border-radius:12px;border:none;background:var(--soft);font-size:22px;font-weight:700;transition:transform .12s}
+.stepper button:active{transform:scale(.9)}
+.num{display:inline-block;font-variant-numeric:tabular-nums}
+.num.bump{animation:bump .25s ease}
+@keyframes bump{50%{transform:scale(1.18)}}
+.bottom-bar{background:var(--card);border-top:1px solid var(--line);padding:14px 16px calc(20px + env(safe-area-inset-bottom, 0px));display:flex;align-items:center;gap:14px;flex-shrink:0}
+
+/* Успех */
+.success-ic{width:84px;height:84px;border-radius:42px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center}
+.screen.anim .success-ic{animation:popIn .5s cubic-bezier(.3,1.5,.5,1) both}
+.success-ic path{stroke-dasharray:30;stroke-dashoffset:0}
+.screen.anim .success-ic path{animation:draw .45s .3s ease-out both}
+@keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes draw{from{stroke-dashoffset:30}to{stroke-dashoffset:0}}
+
+/* Статусы заказа */
+.steps{display:flex;flex-direction:column;gap:0}
+.step{display:flex;gap:12px;align-items:flex-start}
+.step .mark{width:22px;display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.step .circle{width:14px;height:14px;border-radius:7px;border:2px solid var(--border);background:var(--card);margin-top:3px}
+.step.done .circle{background:var(--green);border-color:var(--green)}
+.step .line{width:2px;height:26px;background:var(--line)}
+.step.done .line{background:var(--green)}
+
+/* Формы */
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label,.field .label{font-size:13px;font-weight:700;color:var(--muted)}
+.field input,.field textarea{border-radius:14px;border:1px solid var(--border);background:var(--card);padding:0 14px;height:48px;font-size:16px;min-width:0;width:100%}
+.field textarea{height:auto;padding:12px 14px;font-size:15px;line-height:1.4;resize:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.cnt{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 7px;margin-left:8px;border-radius:999px;background:var(--soft);color:var(--muted);font-size:12px;font-weight:800;vertical-align:middle}
+.chip.on .cnt{background:rgba(255,255,255,.22);color:#fff}
+.chip{height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:14px;font-weight:600;transition:background .2s,color .2s,transform .12s}
+.chip.on{background:var(--green);border-color:var(--green);color:#fff;font-weight:700}
+.upload{height:120px;border-radius:18px;border:2px dashed #A3A8AE;background:var(--card);color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:700;transition:all .3s}
+.upload .ic{width:30px;height:30px;stroke-width:1.8}
+.upload.has{border-style:solid;border-color:var(--green);background:var(--green-bg);color:var(--green)}
+
+.stat{border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;background:var(--soft)}
+.stat b{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;font-weight:600;color:var(--muted)}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chips.scroll .chip{flex-shrink:0}
+.list{background:var(--card);border-radius:18px;display:flex;flex-direction:column;overflow:hidden}
+.list-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border:none;background:none;text-align:left;width:100%;font-size:15px;font-weight:600}
+.list-item + .list-item{border-top:1px solid var(--line)}
+.list-item .ic{color:var(--muted)}
+.avatar{width:56px;height:56px;border-radius:16px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0}
+.toggle{width:44px;height:26px;border-radius:13px;background:var(--green);position:relative;flex-shrink:0}
+.toggle::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:10px;background:#fff}
+.stat.green{background:var(--green-bg)} .stat.green b{color:var(--green)} .stat.green span{color:var(--green-dark)}
+
+/* Карточка заказа агента: уход после принятия */
+.order-open{padding:12px 14px;gap:4px;border:1px solid transparent;text-align:left;width:100%}
+.order-open.is-new{background:#F0F8F2;border-color:#CDE6D4}
+.order-open .between{gap:10px}
+.o-sum{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.order-card{transition:opacity .35s, transform .35s, max-height .4s .2s, padding .4s .2s, margin .4s .2s;max-height:220px;overflow:hidden}
+.order-card.gone{opacity:0;transform:translateX(40px);max-height:0;padding-top:0;padding-bottom:0;margin-top:-14px}
+
+/* Тост */
+.toast{position:absolute;left:16px;right:16px;top:14px;z-index:20;background:#1C1E1B;color:#fff;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;
+  transform:translateY(-140%);transition:transform .4s cubic-bezier(.2,.8,.2,1);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast.show{transform:none}
+.toast .ic{color:#6EE7A0}
+
+/* Пуш-уведомление для агента */
+.notif{position:absolute;left:12px;right:12px;top:12px;z-index:21;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-radius:18px;padding:12px 14px;display:flex;gap:12px;align-items:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.18);transform:translateY(-150%);transition:transform .45s cubic-bezier(.2,.8,.2,1);border:none;text-align:left;width:auto}
+.notif.show{transform:none}
+
+/* Дистрибьютор */
+.tabbar.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+.tabbar.five .tab{font-size:10.5px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:var(--soft)}
+.seg button{height:40px;border:none;border-radius:10px;background:transparent;font-size:14px;font-weight:700;color:var(--muted);transition:background .2s,color .2s}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.bars{display:flex;align-items:flex-end;gap:8px;height:110px}
+.bars div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%}
+.bars b{font-size:11px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.bars i{display:block;width:100%;border-radius:6px 6px 3px 3px;background:#CFE9D8}
+.bars div.today i{background:var(--green)}
+.bars div.today b{color:var(--green)}
+.bars span{font-size:11px;font-weight:600;color:var(--muted)}
+.screen.anim .bars i{animation:grow .6s cubic-bezier(.2,.8,.2,1) both;transform-origin:bottom}
+@keyframes grow{from{transform:scaleY(0)}to{transform:none}}
+.progress{height:6px;border-radius:3px;background:var(--soft);overflow:hidden}
+.progress i{display:block;height:100%;background:var(--green);border-radius:3px}
+.note{border-radius:14px;padding:12px 14px;background:var(--amber-bg);color:var(--amber);font-size:13px;font-weight:600;line-height:1.4}
+.pill.grey{background:var(--soft);color:var(--muted)}
+.tabbar.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.btn.danger{background:#B42318}
+.btn.danger:hover{background:#912018}
+.order-open{transition:transform .12s}
+.order-open:active{transform:scale(.98)}
+.section-h{font-size:13px;font-weight:800;color:var(--muted);padding:6px 2px 0}
+.order-bar[hidden]{display:none}
+/* Фото товара */
+.pimg{width:52px;height:52px;border-radius:12px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;color:var(--muted)}
+.pimg svg{width:44px;height:44px}
+.pimg img{width:100%;height:100%;object-fit:cover}
+.pimg.sm{width:40px;height:40px;border-radius:10px}
+.pimg.sm svg{width:34px;height:34px}
+.pimg .ic{width:22px;height:22px}
+.photo-prev{height:190px;border-radius:18px;background:#fff;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;overflow:hidden;color:var(--muted);font-size:14px;font-weight:600}
+.photo-prev svg.pk{width:150px;height:150px}
+.photo-prev img{width:100%;height:100%;object-fit:contain;background:#fff}
+.photo-prev .ic{width:36px;height:36px;stroke-width:1.6}
+label.btn{cursor:pointer}
+body.lite [data-full],body:not(.lite) [data-lite]{display:none!important}
+body.lite .tabbar[aria-label="Меню магазина"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ver{display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:18px;border:2px solid var(--line);background:var(--card);text-align:left;width:100%}
+.ver:active{transform:scale(.98)}.ver .h2{display:flex;align-items:center;gap:8px}
+/* Вход и регистрация */
+.auth{gap:12px;padding:24px 20px}
+.brand{display:flex;align-items:center;justify-content:center;gap:10px;margin:22px 0 6px}
+.brand-mark{position:relative;width:36px;height:30px;flex-shrink:0}
+.brand-mark i{position:absolute;top:0;width:12px;height:30px;border:5px solid var(--green)}
+.brand-mark::after{content:"";position:absolute;left:7px;right:7px;top:13px;height:4px;border-radius:1px;background:var(--green)}
+.brand-mark i:first-child{left:0;border-right:0}.brand-mark i:last-child{right:0;border-left:0}
+.brand-name{font-size:34px;font-weight:800;letter-spacing:-.04em;line-height:1}.brand-name b{color:var(--green)}
+.auth-head{text-align:center;display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
+.inp{display:flex;align-items:center;gap:10px;height:52px;padding:0 14px;border:1px solid var(--border);border-radius:14px;background:var(--card)}
+.inp:focus-within{border-color:var(--green)}
+.inp .ic{color:var(--muted);width:20px;height:20px}
+.inp input{flex:1;border:none;background:none;height:100%;font-size:16px;min-width:0;outline:none;padding:0}
+.inp .cc{font-weight:700;font-size:16px}
+.eye{border:none;background:none;color:var(--muted);padding:4px;display:flex}.eye.on{color:var(--green)}
+.check{display:flex;gap:10px;align-items:center;font-size:14px}
+.check input{width:20px;height:20px;accent-color:var(--green);flex-shrink:0}
+.linkbtn{border:none;background:none;color:var(--green);font-weight:700;font-size:14px;padding:0;text-align:left}
+.auth-switch{text-align:center;font-size:14px;color:var(--muted);margin-top:4px}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:40;display:flex;align-items:flex-end}
+.sheet{background:var(--bg);border-radius:22px 22px 0 0;padding:10px 16px 16px;width:100%;max-height:88%;display:flex;flex-direction:column;gap:12px}
+.sheet .handle{width:40px;height:4px;border-radius:2px;background:var(--border);align-self:center}
+.sheet .doc{overflow-y:auto;flex:1;min-height:0}
+.sheet .btn,.sheet .seg{flex-shrink:0}
+.seg.three{grid-template-columns:repeat(3,1fr)}.seg.three button{font-size:13px}
+
+.sugg-wrap{position:relative}
+.sugg{position:absolute;top:100%;left:0;right:0;margin-top:4px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:20;overflow:hidden;display:flex;flex-direction:column}
+.sugg .list-item{padding:11px 14px}
+.sugg .list-item:disabled{opacity:.5}
+.chev{color:var(--muted);width:18px;height:18px}
+.doc{font-size:14px;line-height:1.55;gap:0}
+.doc h2{font-size:16px;font-weight:800;margin:18px 0 6px}
+.doc h2:first-child{margin-top:0}
+.doc h3{font-size:15px;font-weight:800;margin:12px 0 4px}
+.doc p{margin:0 0 10px}
+.doc ul{margin:0 0 10px;padding-left:20px}
+.doc li{margin-bottom:4px}
+.stepper.sm{gap:6px}
+.stepper.sm button{width:38px;height:38px;font-size:20px}
+.stepper.sm .num{min-width:26px;text-align:center;font-weight:800}
+.qin{width:60px;height:44px;border:1px solid var(--border);border-radius:12px;background:var(--card);text-align:center;font-size:18px;font-weight:800;padding:0;-moz-appearance:textfield;appearance:textfield}
+.qin::-webkit-inner-spin-button,.qin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.qin:focus{outline:none;border-color:var(--green)}
+.stepper.sm .qin{width:48px;height:38px;font-size:16px}
+.stepper button:disabled,.btn:disabled{opacity:.4}
+/* Накладная */
+.inv{gap:10px;font-size:13px;border:1px solid var(--line)}
+.inv-party{display:flex;flex-direction:column;gap:2px}
+.inv-t{width:100%;border-collapse:collapse;font-size:12px}
+.inv-t th{font-size:11px;color:var(--muted);text-align:left;font-weight:700;padding:4px 4px 6px}
+.inv-t td{padding:7px 4px;border-top:1px solid var(--line);vertical-align:top;font-variant-numeric:tabular-nums}
+.inv-t .r{text-align:right;white-space:nowrap}
+.inv-sign{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding-top:12px}
+.inv-sign div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.inv-sign .line{height:24px;border-bottom:1px solid var(--text)}
+button.toggle{border:none;padding:0;transition:background .2s}
+button.toggle::after{transition:right .2s}
+.toggle.off{background:#C9CCD0}
+.toggle.off::after{right:21px}
+.body > *{flex-shrink:0}
+/* Тень только у показанного тоста и пуша, иначе она видна у верхнего края */
+.toast:not(.show),.notif:not(.show){box-shadow:none}
+
+/* На компьютере — телефон по центру */
+@media (min-width:700px){
+  body{background:var(--page)}
+  .phone{inset:16px auto;left:50%;width:420px;transform:translateX(-50%);border-radius:28px;box-shadow:0 20px 50px rgba(0,0,0,.18)}
+}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}
+}
+</style>
+
+</head><body>
+<div class="phone" id="phone">
+
+  <div class="sheet-bg" id="logout-sheet" role="dialog" aria-modal="true" aria-label="Выход" hidden>
+    <div class="sheet"><span class="handle" aria-hidden="true"></span><span class="h2" style="text-align:center">Выйти из аккаунта?</span>
+      <button type="button" class="btn lg danger" id="logout-yes">Выйти</button><button type="button" class="btn lg ghost" id="logout-no">Отмена</button></div>
+  </div>
+  <div class="sheet-bg" id="cart-sheet" role="dialog" aria-modal="true" aria-label="Заказ" hidden>
+    <div class="sheet">
+      <span class="handle" aria-hidden="true"></span>
+      <span class="h2" id="cart-title"></span>
+      <div class="card" id="cart-list" style="gap:10px;overflow-y:auto;min-height:0"></div>
+      <div class="between"><span class="bold" style="font-size:15px">Итого</span><span class="price" id="cart-total"></span></div>
+      <button type="button" class="btn lg" id="cart-send">Отправить заказ</button>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"><svg class="ic"><use href="#i-check"/></svg><span id="toast-text">Готово</span></div>
+
+  <!-- ========== ВЫБОР ВЕРСИИ (для показа) ========== -->
+  <section class="screen" id="version" data-role="auth">
+    <div class="body auth">
+      <div class="brand" aria-label="Zakup.KG"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><span class="brand-name">Zakup<b>.KG</b></span></div>
+      <div class="auth-head"><span class="h1">Выберите версию</span></div>
+      <button type="button" class="ver" data-ver="full"><span class="h2">Тест 1</span></button>
+      <button type="button" class="ver" data-ver="lite" style="background:var(--green-bg);border-color:var(--green)"><span class="h2">Тест 2</span></button>
+    </div>
+  </section>
+
+  <!-- ========== ВХОД И РЕГИСТРАЦИЯ (логика из ветки Hades) ========== -->
+  <section class="screen" id="auth" data-role="auth" hidden>
+    <div class="body auth">
+      <div class="brand" aria-label="Zakup.KG"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><span class="brand-name">Zakup<b>.KG</b></span></div>
+      <div class="auth-head"><span class="h1" id="auth-title">Вход</span><span class="small muted" id="auth-sub">Добро пожаловать!</span></div>
+      <div class="seg" id="auth-type" role="radiogroup" aria-label="Тип аккаунта"><button type="button" class="on" data-acc="shop">Магазин</button><button type="button" data-acc="supplier">Поставщик</button></div>
+
+      <form id="login-form" class="col" style="display:flex;flex-direction:column;gap:12px" novalidate>
+        <label class="inp"><svg class="ic"><use href="#i-phone"/></svg><span class="cc">+996</span><input type="text" placeholder="Номер телефона" inputmode="numeric" pattern="[0-9]{3} [0-9]{3} [0-9]{3}" data-phone required></label>
+        <label class="inp"><svg class="ic"><use href="#i-lock"/></svg><input type="password" placeholder="Пароль" data-pw required><button type="button" class="eye" data-eye aria-label="Показать пароль" aria-pressed="false"><svg class="ic"><use href="#i-eye"/></svg></button></label>
+        <button type="button" class="linkbtn" data-toast="Восстановление пароля — в следующей версии">Забыли пароль?</button>
+        <button type="submit" class="btn lg">Войти</button>
+      </form>
+
+      <form id="reg-form" style="display:flex;flex-direction:column;gap:12px" hidden novalidate>
+        <label class="inp"><svg class="ic"><use href="#i-store"/></svg><input type="text" id="reg-name" placeholder="Название магазина" required></label>
+        <label class="inp"><svg class="ic"><use href="#i-doc"/></svg><input type="text" placeholder="ИНН / ПИН" inputmode="numeric" pattern="[0-9]{14}" data-digits="14" required></label>
+        <label class="inp"><svg class="ic"><use href="#i-pin"/></svg><input type="text" id="reg-addr" placeholder="Адрес магазина / доставки" required></label>
+        <label class="inp"><svg class="ic"><use href="#i-phone"/></svg><span class="cc">+996</span><input type="text" placeholder="Номер телефона" inputmode="numeric" pattern="[0-9]{3} [0-9]{3} [0-9]{3}" data-phone required></label>
+        <label class="inp"><svg class="ic"><use href="#i-lock"/></svg><input type="password" id="reg-pw" placeholder="Придумайте пароль" minlength="8" data-pw required></label>
+        <label class="inp"><svg class="ic"><use href="#i-lock"/></svg><input type="password" id="reg-pw2" placeholder="Повторите пароль" minlength="8" data-pw required><button type="button" class="eye" data-eye aria-label="Показать пароль" aria-pressed="false"><svg class="ic"><use href="#i-eye"/></svg></button></label>
+        <label class="check"><input type="checkbox" id="reg-agree" required><span>Согласен с <button type="button" class="linkbtn" data-agree-open>условиями, офертой и политикой</button></span></label>
+        <button type="submit" class="btn lg">Зарегистрироваться</button>
+      </form>
+
+      <p class="auth-switch"><span id="to-reg">Нет аккаунта? <button type="button" class="linkbtn" data-auth="reg">Зарегистрироваться</button></span><span id="to-login" hidden>Уже есть аккаунт? <button type="button" class="linkbtn" data-auth="login">Войти</button></span></p>
+      <button type="button" class="linkbtn" id="ver-change" style="align-self:center;color:var(--muted);font-weight:600"><span id="ver-name">Тест 1</span></button>
+      <div class="demo-roles" aria-label="Открыть кабинет без входа"><button type="button" class="linkbtn" data-role-go="shop">Магазин</button><button type="button" class="linkbtn" data-role-go="agent">Агент</button><button type="button" class="linkbtn" data-role-go="dist">Дистрибьютор</button></div>
+    </div>
+
+    <div class="sheet-bg" id="agree-sheet" role="dialog" aria-modal="true" aria-label="Документы" hidden>
+      <div class="sheet">
+        <span class="handle" aria-hidden="true"></span>
+        <span class="h2">Условия, оферта и политика</span>
+        <div class="seg three" id="agree-tabs" role="tablist"><button type="button" class="on" data-agr="user_agreement_zakup_kg">Соглашение</button><button type="button" data-agr="oferta">Оферта</button><button type="button" data-agr="privacy">Политика</button></div>
+        <div class="card doc" id="agree-body" tabindex="0"></div>
+        <button type="button" class="btn lg" id="agree-accept">Принять и продолжить</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== МАГАЗИН: ГЛАВНАЯ ========== -->
+  <section class="screen" id="s-home" data-role="shop" hidden>
+    <header class="top">
+      <div class="between">
+        <div class="grow">
+          <span class="h1">Что заказать сегодня?</span>
+        </div>
+        <button class="icon-btn" data-go="s-notifs" aria-label="Уведомления"><svg class="ic"><use href="#i-bell"/></svg></button>
+      </div>
+      <label class="search"><svg class="ic"><use href="#i-search"/></svg><input id="search" type="search" aria-label="Поиск товаров" placeholder="Молоко, хлеб, масло…"></label>
+    </header>
+    <div class="body">
+      <div class="card rise" style="gap:10px">
+        <span class="h2">Остатки на складе</span>
+        <div class="chips scroll stock-filter" style="margin:0 -16px;padding:0 16px"></div>
+        <div class="stock-list" data-limit="5" style="display:flex;flex-direction:column;gap:10px"></div>
+        <button type="button" class="linkbtn" id="stock-more" data-go="s-stock" style="display:flex;align-items:center;gap:2px"></button>
+      </div>
+      <span class="h2 rise">Заказать у поставщика</span>
+      <div id="sup-groups" style="display:flex;flex-direction:column;gap:10px"></div>
+      <div class="between rise" data-full><span class="h2">Новинки от агентов</span><button class="small bold" data-tab="s-catalog" style="color:var(--green);border:none;background:none;padding:6px 0">Все</button></div>
+      <div class="grid2 rise" data-full>
+        <button class="product" data-go="s-novelty">
+          <span class="img" style="background:#fff;border:1px solid var(--line)"><svg viewBox="0 0 64 64" style="width:80px;height:80px"><use href="#p-juice"/></svg><span class="badge">NEW</span></span>
+          <span class="name" style="font-size:14px">Сок яблочный, 1 л</span>
+          <span class="xs muted">Агент Нурлан</span>
+          <span class="price" style="font-size:16px">95 сом</span>
+        </button>
+        <button class="product" data-go="s-novelty">
+          <span class="img" style="background:#fff;border:1px solid var(--line)"><svg viewBox="0 0 64 64" style="width:80px;height:80px"><use href="#p-cookie"/></svg><span class="badge">NEW</span></span>
+          <span class="name" style="font-size:14px">Печенье овсяное, 300 г</span>
+          <span class="xs muted">Агент Айгерим</span>
+          <span class="price" style="font-size:16px">68 сом</span>
+        </button>
+      </div>
+    </div>
+    <nav class="tabbar" aria-label="Меню магазина">
+      <button class="tab on" data-tab="s-home"><svg class="ic"><use href="#i-home"/></svg>Главная</button>
+      <button class="tab" data-tab="s-catalog" data-full><svg class="ic"><use href="#i-grid"/></svg>Каталог</button>
+      <button class="tab" data-tab="s-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы<span class="badge-n" id="shop-badge" hidden>1</span></button>
+      <button class="tab" data-tab="s-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+
+  <!-- ========== МАГАЗИН: ВСЕ ОСТАТКИ ========== -->
+  <section class="screen" id="s-stock" data-role="shop" hidden>
+    <header class="top">
+      <div class="row" style="gap:8px">
+        <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <span style="font-size:18px;font-weight:800">Остатки на складе</span>
+      </div>
+      <label class="search"><svg class="ic"><use href="#i-search"/></svg><input id="stock-search" type="search" aria-label="Поиск по остаткам" placeholder="Найти товар"></label>
+      <div class="chips scroll stock-filter"></div>
+    </header>
+    <div class="body"><div class="card stock-list" style="gap:10px"></div></div>
+  </section>
+
+  <!-- ========== МАГАЗИН: ВЫБОР ПОСТАВЩИКА ========== -->
+  <section class="screen" id="s-product" data-role="shop" hidden>
+    <header class="top" style="padding-top:14px">
+      <div class="row" style="gap:8px">
+        <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <span class="bold" style="font-size:16px">Товар</span>
+      </div>
+      <div style="height:150px;border-radius:18px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 64 64" style="width:120px;height:120px"><use href="#p-milk"/></svg>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+        <span style="font-size:20px;font-weight:800;line-height:1.25">Молоко «Белая река» 3,2%, 1 л</span>
+        <span class="pill warn" style="font-size:13px">На складе: 4 шт</span>
+      </div>
+    </header>
+    <div class="body" style="gap:12px">
+      <span class="h2 rise" data-full>Выберите поставщика</span><span class="h2 rise" data-lite>Поставщик</span>
+      <button class="supplier on rise" data-price="72" data-name="Агент Азамат" data-when="завтра до 12:00">
+        <span class="radio"></span>
+        <span class="grow" style="gap:3px">
+          <span class="row" style="gap:6px"><span class="bold" style="font-size:15px">Агент Азамат</span><span data-full class="pill green" style="font-size:11px;padding:2px 8px">Дешевле</span></span>
+          <span class="small muted">Доставка завтра до 12:00 · от 10 шт</span>
+        </span>
+        <span class="price">72 сом</span>
+      </button>
+      <button class="supplier rise" data-full data-price="75" data-name="Агент Нурлан" data-when="сегодня до 18:00">
+        <span class="radio"></span>
+        <span class="grow" style="gap:3px"><span class="bold" style="font-size:15px">Агент Нурлан</span><span class="small muted">Доставка сегодня до 18:00 · от 20 шт</span></span>
+        <span class="price">75 сом</span>
+      </button>
+      <button class="supplier rise" data-full data-price="77" data-name="Агент Айгерим" data-when="завтра">
+        <span class="radio"></span>
+        <span class="grow" style="gap:3px"><span class="bold" style="font-size:15px">Агент Айгерим</span><span class="small muted">Доставка завтра · отсрочка 7 дней</span></span>
+        <span class="price">77 сом</span>
+      </button>
+      <div class="card between rise" style="flex-direction:row;padding:12px 14px">
+        <span class="name">Количество</span>
+        <div class="stepper">
+          <button id="qty-minus" aria-label="Меньше">−</button>
+          <input id="qty" class="qin" type="number" inputmode="numeric" min="1" value="20" aria-label="Количество">
+          <button id="qty-plus" aria-label="Больше">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <span class="xs muted bold">Итого</span>
+        <span style="font-size:21px;font-weight:800"><span id="total" class="num">1 440</span> сом</span>
+      </div>
+      <button class="btn lg" id="place-order" style="flex:1;width:auto">Заказать</button>
+    </div>
+  </section>
+
+  <!-- ========== МАГАЗИН: ЗАКАЗ ОФОРМЛЕН ========== -->
+  <section class="screen" id="s-success" data-role="shop" hidden>
+    <div class="body" style="padding-top:36px;gap:16px">
+      <div class="rise" style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:4px 0">
+        <div class="success-ic"><svg class="ic" style="width:42px;height:42px;stroke-width:2.6" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <span style="font-size:24px;font-weight:800">Заказ отправлен</span>
+        <span class="muted" style="font-size:15px;line-height:1.4;max-width:290px"><span class="sup-name">Агент Азамат</span> получил заказ и подтвердит его в ближайшее время</span>
+      </div>
+      <div class="card rise">
+        <div class="between"><span class="bold" style="font-size:15px">Заказ № 0001</span><span class="pill amber">Ждёт подтверждения</span></div>
+        <div class="divider"></div>
+        <div class="between" style="font-size:14px"><span class="muted">Товар</span><span style="font-weight:600;text-align:right">Молоко «Белая река» 3,2%</span></div>
+        <div class="between" style="font-size:14px"><span class="muted">Количество</span><span style="font-weight:600"><span class="sum-qty">20</span> шт × <span class="sum-price">72</span> сом</span></div>
+        <div class="between" style="font-size:14px"><span class="muted">Поставщик</span><span style="font-weight:600" class="sup-name">Агент Азамат</span></div>
+        <div class="between" style="font-size:14px"><span class="muted">Оплата</span><span style="font-weight:600">При получении</span></div>
+        <div class="divider"></div>
+        <div class="between"><span class="bold" style="font-size:15px">Итого</span><span class="price" style="font-size:20px"><span class="sum-total">1 440</span> сом</span></div>
+      </div>
+      <button class="card row rise" data-go="s-invoice" style="flex-direction:row;padding:14px 16px;border:none;text-align:left">
+        <span class="thumb" style="width:44px;height:44px;background:#FDECEC;color:#B42318"><svg class="ic"><use href="#i-pdf"/></svg></span>
+        <span class="grow"><span class="bold" style="font-size:15px">Накладная № 0001.pdf</span><span class="small muted">Скачать или отправить</span></span>
+        <svg class="ic" style="color:var(--muted);width:20px;height:20px"><use href="#i-next"/></svg>
+      </button>
+    </div>
+    <div style="padding:0 16px 22px;display:flex;flex-direction:column;gap:10px;flex-shrink:0">
+      <button class="btn lg" data-tab="s-orders">Мои заказы</button>
+      <button class="btn lg white" data-tab="s-home">На главную</button>
+    </div>
+  </section>
+
+  <!-- ========== МАГАЗИН: МОИ ЗАКАЗЫ ========== -->
+  <section class="screen" id="s-orders" data-role="shop" hidden>
+    <header class="top"><span class="h1">Мои заказы</span></header>
+    <div class="body">
+      <div id="s-order-list" style="display:flex;flex-direction:column;gap:14px"></div>
+    </div>
+    <nav class="tabbar" aria-label="Меню магазина">
+      <button class="tab" data-tab="s-home"><svg class="ic"><use href="#i-home"/></svg>Главная</button>
+      <button class="tab" data-tab="s-catalog" data-full><svg class="ic"><use href="#i-grid"/></svg>Каталог</button>
+      <button class="tab on" data-tab="s-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы</button>
+      <button class="tab" data-tab="s-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+
+  <!-- ========== МАГАЗИН: ЗАКАЗ ========== -->
+  <section class="screen" id="s-order" data-role="shop" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800" id="so-title"></span>
+    </header>
+    <div class="body" id="so-body"></div>
+  </section>
+
+  <!-- ========== МАГАЗИН: КАТАЛОГ ========== -->
+  <section class="screen" id="s-catalog" data-role="shop" hidden>
+    <header class="top">
+      <span class="h1">Каталог</span>
+      <label class="search"><svg class="ic"><use href="#i-search"/></svg><input id="cat-search" type="search" aria-label="Поиск в каталоге" placeholder="Найти товар"></label>
+      <div class="chips scroll">
+        <button type="button" class="chip on">Все</button>
+        <button type="button" class="chip">Молочка</button>
+        <button type="button" class="chip">Хлеб</button>
+        <button type="button" class="chip">Напитки</button>
+        <button type="button" class="chip">Бакалея</button>
+        <button type="button" class="chip">Сладости</button>
+      </div>
+    </header>
+    <div class="body">
+      <div class="grid2 rise">
+        <button class="product" data-go="s-product">
+          <span class="img" style="background:#fff;border:1px solid var(--line)"><svg viewBox="0 0 64 64" style="width:80px;height:80px"><use href="#p-milk"/></svg></span>
+          <span class="name" style="font-size:14px">Молоко 3,2%, 1 л</span>
+          <span class="xs muted">3 поставщика</span>
+          <span class="price" style="font-size:16px">от 72 сом</span>
+        </button>
+        <button class="product" data-go="s-product">
+          <span class="img" style="background:#fff;border:1px solid var(--line)"><svg viewBox="0 0 64 64" style="width:80px;height:80px"><use href="#p-bread"/></svg></span>
+          <span class="name" style="font-size:14px">Хлеб белый, 500 г</span>
+          <span class="xs muted">2 поставщика</span>
+          <span class="price" style="font-size:16px">от 38 сом</span>
+        </button>
+      </div>
+      <div class="grid2 rise">
+        <button class="product" data-go="s-product">
+          <span class="img" style="background:#fff;border:1px solid var(--line)"><svg viewBox="0 0 64 64" style="width:80px;height:80px"><use href="#p-butter"/></svg></span>
+          <span class="name" style="font-size:14px">Масло сливочное 82%</span>
+          <span class="xs muted">4 поставщика</span>
+          <span class="price" style="font-size:16px">от 145 сом</span>
+        </button>
+        <button class="product" data-go="s-product">
+          <span class="img" style="background:#fff;border:1px solid var(--line)"><svg viewBox="0 0 64 64" style="width:80px;height:80px"><use href="#p-kefir"/></svg></span>
+          <span class="name" style="font-size:14px">Кефир 2,5%, 1 л</span>
+          <span class="xs muted">2 поставщика</span>
+          <span class="price" style="font-size:16px">от 65 сом</span>
+        </button>
+      </div>
+      <div class="grid2 rise">
+        <button class="product" data-go="s-novelty">
+          <span class="img" style="background:#fff;border:1px solid var(--line)"><svg viewBox="0 0 64 64" style="width:80px;height:80px"><use href="#p-juice"/></svg><span class="badge">NEW</span></span>
+          <span class="name" style="font-size:14px">Сок яблочный, 1 л</span>
+          <span class="xs muted">1 поставщик</span>
+          <span class="price" style="font-size:16px">95 сом</span>
+        </button>
+        <button class="product" data-go="s-product">
+          <span class="img" style="background:#fff;border:1px solid var(--line)"><svg viewBox="0 0 64 64" style="width:80px;height:80px"><use href="#p-sugar"/></svg></span>
+          <span class="name" style="font-size:14px">Сахар, 1 кг</span>
+          <span class="xs muted">5 поставщиков</span>
+          <span class="price" style="font-size:16px">от 82 сом</span>
+        </button>
+      </div>
+    </div>
+    <nav class="tabbar" aria-label="Меню магазина">
+      <button class="tab" data-tab="s-home"><svg class="ic"><use href="#i-home"/></svg>Главная</button>
+      <button class="tab on" data-tab="s-catalog" data-full><svg class="ic"><use href="#i-grid"/></svg>Каталог</button>
+      <button class="tab" data-tab="s-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы</button>
+      <button class="tab" data-tab="s-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+
+  <!-- ========== МАГАЗИН: ПРОФИЛЬ ========== -->
+  <section class="screen" id="s-profile" data-role="shop" hidden>
+    <header class="top">
+      <div class="row">
+        <div class="avatar">М</div>
+        <div class="grow"><span class="h1" style="font-size:20px">Магазин «Айдана»</span><span class="small muted">ул. Ахунбаева, 112 · ИП Асанова Н.</span></div>
+      </div>
+    </header>
+    <div class="body">
+      <div class="card rise">
+        <div class="between"><span class="h2">Учёт склада</span><span class="pill green">Подключено</span></div>
+        <span class="small muted">Остатки обновляются автоматически из вашей программы учёта. Последняя синхронизация 5 минут назад.</span>
+      </div>
+      <div class="list rise">
+        <button class="list-item" data-go="s-invoice"><svg class="ic"><use href="#i-pdf"/></svg><span class="grow">Накладные</span><svg class="ic chev"><use href="#i-next"/></svg></button>
+        <button class="list-item" data-go="s-settings"><svg class="ic"><use href="#i-user"/></svg><span class="grow">Настройки</span><svg class="ic chev"><use href="#i-next"/></svg></button>
+        <button class="list-item" data-go="docs"><svg class="ic"><use href="#i-doc"/></svg><span class="grow">Договоры и правила</span><svg class="ic chev"><use href="#i-next"/></svg></button>
+      </div>
+      <div class="list rise">
+        <button class="list-item" data-logout style="color:#B42318"><span class="grow">Выйти</span></button>
+      </div>
+    </div>
+    <nav class="tabbar" aria-label="Меню магазина">
+      <button class="tab" data-tab="s-home"><svg class="ic"><use href="#i-home"/></svg>Главная</button>
+      <button class="tab" data-tab="s-catalog" data-full><svg class="ic"><use href="#i-grid"/></svg>Каталог</button>
+      <button class="tab" data-tab="s-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы</button>
+      <button class="tab on" data-tab="s-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+
+  <!-- ========== МАГАЗИН: МОИ ПОСТАВЩИКИ ========== -->
+  <section class="screen" id="s-suppliers" data-role="shop" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800">Мои поставщики</span>
+    </header>
+    <div class="body">
+      <div class="card row rise" style="flex-direction:row;padding:14px">
+        <div class="avatar" style="width:44px;height:44px;font-size:17px;border-radius:12px">А</div>
+        <div class="grow"><span class="bold" style="font-size:15px">Агент Азамат</span><span class="small muted">Молочная продукция · 42 товара</span></div>
+        <span class="pill green">Активен</span>
+      </div>
+      <div class="card row rise" style="flex-direction:row;padding:14px">
+        <div class="avatar" style="width:44px;height:44px;font-size:17px;border-radius:12px;background:#2B5C8F">Н</div>
+        <div class="grow"><span class="bold" style="font-size:15px">Агент Нурлан</span><span class="small muted">Напитки, соки · 28 товаров</span></div>
+        <span class="pill green">Активен</span>
+      </div>
+      <div class="card row rise" style="flex-direction:row;padding:14px">
+        <div class="avatar" style="width:44px;height:44px;font-size:17px;border-radius:12px;background:#6B46A8">А</div>
+        <div class="grow"><span class="bold" style="font-size:15px">Агент Айгерим</span><span class="small muted">Сладости, бакалея · 65 товаров</span></div>
+        <span class="pill amber">Отсрочка</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== МАГАЗИН: УВЕДОМЛЕНИЯ ========== -->
+  <section class="screen" id="s-notifs" data-role="shop" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800">Уведомления</span>
+    </header>
+    <div class="body" style="gap:10px">
+      <div class="card row rise" style="flex-direction:row;padding:14px">
+        <span class="pimg sm"><svg viewBox="0 0 64 64"><use href="#p-milk"/></svg></span>
+        <span class="grow"><span class="bold" style="font-size:14px">Молоко 3,2% заканчивается</span><span class="small muted">Осталось 4 шт · 10 мин назад</span></span>
+      </div>
+      <div data-full class="card row rise" style="flex-direction:row;padding:14px">
+        <span class="pimg sm"><svg viewBox="0 0 64 64"><use href="#p-juice"/></svg></span>
+        <span class="grow"><span class="bold" style="font-size:14px">Новинка от агента Нурлана</span><span class="small muted">Сок яблочный, 1 л · 1 ч назад</span></span>
+      </div>
+      <div class="card row rise" style="flex-direction:row;padding:14px">
+        <span class="thumb" style="width:40px;height:40px;background:var(--soft)"><svg class="ic"><use href="#i-truck"/></svg></span>
+        <span class="grow"><span class="bold" style="font-size:14px">Заказ № 0000 доставлен</span><span class="small muted">Кефир 2,5% × 10 · вчера</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== МАГАЗИН: НОВИНКА ОТ АГЕНТА ========== -->
+  <section class="screen" id="s-novelty" data-role="shop" hidden>
+    <header class="top" style="padding-top:calc(14px + env(safe-area-inset-top, 0px))">
+      <div class="row" style="gap:8px">
+        <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <span class="bold" style="font-size:16px">Предложение агента</span>
+      </div>
+      <div style="height:150px;border-radius:18px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;position:relative">
+        <svg viewBox="0 0 64 64" style="width:120px;height:120px"><use href="#p-juice"/></svg><span class="badge">NEW</span>
+      </div>
+      <span style="font-size:20px;font-weight:800">Сок яблочный, 1 л</span>
+    </header>
+    <div class="body">
+      <div class="card rise">
+        <div class="row"><div class="avatar" style="width:40px;height:40px;font-size:16px;border-radius:12px;background:#2B5C8F">Н</div><div class="grow"><span class="bold" style="font-size:15px">Агент Нурлан</span><span class="small muted">Напитки, соки</span></div></div>
+        <span style="font-size:15px;line-height:1.45">Новинка! При заказе от 24 шт — скидка 5%.</span>
+      </div>
+      <div class="card rise" style="gap:10px">
+        <div class="between" style="font-size:14px"><span class="muted">Цена за шт</span><span class="bold">95 сом</span></div>
+        <div class="between" style="font-size:14px"><span class="muted">Минимальный заказ</span><span class="bold">12 шт</span></div>
+        <div class="between" style="font-size:14px"><span class="muted">Доставка</span><span class="bold">завтра</span></div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <button class="btn lg ghost" style="flex:1;width:auto" data-back>Не сейчас</button>
+      <button class="btn lg" style="flex:1.4;width:auto" id="try-batch">Взять пробную партию</button>
+    </div>
+  </section>
+
+  <!-- ========== МАГАЗИН: НАКЛАДНАЯ ========== -->
+  <section class="screen" id="s-invoice" data-role="shop" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800" id="invoice-title">Накладная</span>
+    </header>
+    <!-- Заполняется из заказа: renderInvoice() -->
+    <div class="body" id="invoice-paper"></div>
+    <div class="bottom-bar">
+      <button class="btn lg" id="share-invoice">Поделиться PDF</button>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       Два варианта продукта, по итогам встречи останется один:
+       «Агент»        — заказы принимает торговый агент, кабинета дистрибьютора нет;
+       «Дистрибьютор» — заказы принимает офис напрямую, агентов нет.
+       ================================================================ -->
+
+  <!-- ========== АГЕНТ: ЗАКАЗЫ ========== -->
+  <section class="screen" id="a-orders" data-role="agent" hidden>
+    <header class="top">
+      <div class="grow"><span class="h1">Заказы</span></div>
+      <div class="chips scroll filter" data-role-list="agent">
+        <button type="button" class="chip on" data-f="all">Все</button>
+        <button type="button" class="chip" data-f="new">Новые<span class="cnt agent-new-n">2</span></button>
+        <button type="button" class="chip" data-f="work">В работе</button>
+        <button type="button" class="chip" data-f="done">Завершены</button>
+      </div>
+    </header>
+    <div class="body" style="gap:10px" id="agent-order-list"></div>
+    <nav class="tabbar five" aria-label="Меню агента">
+      <button class="tab on" data-tab="a-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы<span class="badge-n agent-badge">2</span></button>
+      <button class="tab" data-tab="a-catalog"><svg class="ic"><use href="#i-box"/></svg>Товары</button>
+      <button class="tab" data-tab="a-stores"><svg class="ic"><use href="#i-store"/></svg>Магазины</button>
+      <button class="tab" data-tab="a-route"><svg class="ic"><use href="#i-truck"/></svg>Доставка</button>
+      <button class="tab" data-tab="a-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+
+  <!-- ========== АГЕНТ: КАРТОЧКА ЗАКАЗА ========== -->
+  <section class="screen" id="a-order" data-role="agent" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800" class="order-title">Заказ</span>
+    </header>
+    <div class="body order-body"></div>
+    <div class="bottom-bar order-bar"></div>
+  </section>
+
+  <!-- ========== АГЕНТ: МАГАЗИНЫ ========== -->
+  <section class="screen" id="a-stores" data-role="agent" hidden>
+    <header class="top">
+      <span class="h1">Мои магазины</span>
+      <label class="search"><svg class="ic"><use href="#i-search"/></svg><input type="search" aria-label="Поиск магазина" placeholder="Название или адрес"></label>
+    </header>
+    <div class="body" style="gap:10px" id="a-store-list">
+      <div class="card row rise" style="flex-direction:row;padding:14px">
+        <span class="thumb" style="width:44px;height:44px;background:var(--soft)"><svg class="ic"><use href="#i-store"/></svg></span>
+        <span class="grow"><span class="bold" style="font-size:15px">Магазин «Достук»</span><span class="small muted">ул. Токтогула, 45 · заказ сегодня</span></span>
+      </div>
+      <div class="card row rise" style="flex-direction:row;padding:14px">
+        <span class="thumb" style="width:44px;height:44px;background:var(--soft)"><svg class="ic"><use href="#i-store"/></svg></span>
+        <span class="grow"><span class="bold" style="font-size:15px">Минимаркет «Ала-Тоо»</span><span class="small muted">ул. Байтик Баатыра, 7 · заказ сегодня</span></span>
+      </div>
+      <div class="card row rise" style="flex-direction:row;padding:14px">
+        <span class="thumb" style="width:44px;height:44px;background:var(--soft)"><svg class="ic"><use href="#i-store"/></svg></span>
+        <span class="grow"><span class="bold" style="font-size:15px">Продукты «Нур»</span><span class="small muted">ул. Ибраимова, 29 · заказ вчера</span></span>
+      </div>
+      <div class="card row rise" style="flex-direction:row;padding:14px">
+        <span class="thumb" style="width:44px;height:44px;background:var(--soft)"><svg class="ic"><use href="#i-store"/></svg></span>
+        <span class="grow"><span class="bold" style="font-size:15px">Магазин «Асель»</span><span class="small muted">ул. Жибек Жолу, 310 · заказ 3 дня назад</span></span>
+      </div>
+      <div class="card row rise" style="flex-direction:row;padding:14px">
+        <span class="thumb" style="width:44px;height:44px;background:var(--warn-bg);color:var(--warn)"><svg class="ic"><use href="#i-store"/></svg></span>
+        <span class="grow"><span class="bold" style="font-size:15px">Магазин «Береке»</span><span class="small warn">Не заказывал 12 дней</span></span>
+      </div>
+      <button type="button" class="btn lg ghost" data-add-store><svg class="ic"><use href="#i-plus"/></svg>Добавить магазин</button>
+    </div>
+    <nav class="tabbar five" aria-label="Меню агента">
+      <button class="tab" data-tab="a-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы<span class="badge-n agent-badge">2</span></button>
+      <button class="tab" data-tab="a-catalog"><svg class="ic"><use href="#i-box"/></svg>Товары</button>
+      <button class="tab on" data-tab="a-stores"><svg class="ic"><use href="#i-store"/></svg>Магазины</button>
+      <button class="tab" data-tab="a-route"><svg class="ic"><use href="#i-truck"/></svg>Доставка</button>
+      <button class="tab" data-tab="a-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+
+  <!-- ========== АГЕНТ: НА ДОСТАВКУ ========== -->
+  <section class="screen" id="a-route" data-role="agent" hidden>
+    <header class="top">
+      <div class="grow"><span class="h1">На доставку</span></div>
+      <div class="grid2" style="gap:10px">
+        <div class="stat"><b class="route-n">2</b><span>Магазина</span></div>
+        <div class="stat green"><b class="route-sum">4 330</b><span>Собрать оплату, сом</span></div>
+      </div>
+    </header>
+    <div class="body" style="gap:10px" id="route-list"></div>
+    <nav class="tabbar five" aria-label="Меню агента">
+      <button class="tab" data-tab="a-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы<span class="badge-n agent-badge">2</span></button>
+      <button class="tab" data-tab="a-catalog"><svg class="ic"><use href="#i-box"/></svg>Товары</button>
+      <button class="tab" data-tab="a-stores"><svg class="ic"><use href="#i-store"/></svg>Магазины</button>
+      <button class="tab on" data-tab="a-route"><svg class="ic"><use href="#i-truck"/></svg>Доставка</button>
+      <button class="tab" data-tab="a-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+
+  <!-- ========== ДИСТРИБЬЮТОР: ЗАКАЗЫ ========== -->
+  <section class="screen" id="d-orders" data-role="dist" hidden>
+    <header class="top">
+      <div class="grow"><span class="h1">Заказы</span></div>
+      <div class="chips scroll filter" data-role-list="dist">
+        <button type="button" class="chip on" data-f="all">Все</button>
+        <button type="button" class="chip" data-f="new">Новые<span class="cnt dist-new-n">3</span></button>
+        <button type="button" class="chip" data-f="work">В работе</button>
+        <button type="button" class="chip" data-f="done">Завершены</button>
+      </div>
+    </header>
+    <div class="body" style="gap:10px" id="dist-order-list"></div>
+    <nav class="tabbar" aria-label="Меню дистрибьютора">
+      <button class="tab on" data-tab="d-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы<span class="badge-n dist-badge">3</span></button>
+      <button class="tab" data-tab="d-catalog"><svg class="ic"><use href="#i-box"/></svg>Товары</button>
+      <button class="tab" data-tab="d-stores"><svg class="ic"><use href="#i-store"/></svg>Магазины</button>
+      <button class="tab" data-tab="d-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+
+  <!-- ========== ДИСТРИБЬЮТОР: КАРТОЧКА ЗАКАЗА ========== -->
+  <section class="screen" id="d-order" data-role="dist" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800" class="order-title">Заказ</span>
+    </header>
+    <div class="body order-body"></div>
+    <div class="bottom-bar order-bar"></div>
+  </section>
+
+  <!-- ========== ДИСТРИБЬЮТОР: ТОВАРЫ ========== -->
+  <section class="screen" id="d-catalog" data-role="dist" hidden>
+    <header class="top">
+      <span class="h1">Товары</span>
+      <label class="search"><svg class="ic"><use href="#i-search"/></svg><input type="search" aria-label="Поиск товара" placeholder="Название товара"></label>
+    </header>
+    <div class="body" style="gap:10px" id="d-product-list">
+      <button class="card row rise prod" data-edit style="flex-direction:row;padding:14px;border:none;text-align:left">
+        <span class="pimg"><svg viewBox="0 0 64 64"><use href="#p-milk"/></svg></span>
+        <span class="grow"><span class="name p-name">Молоко «Белая река» 3,2%, 1 л</span><span class="small p-meta muted">от <span class="p-min">10</span> шт · <span class="p-avail">в наличии</span></span></span>
+        <span class="price"><span class="p-price">72</span> сом</span>
+      </button>
+      <button class="card row rise prod" data-edit style="flex-direction:row;padding:14px;border:none;text-align:left">
+        <span class="pimg"><svg viewBox="0 0 64 64"><use href="#p-kefir"/></svg></span>
+        <span class="grow"><span class="name p-name">Кефир 2,5%, 1 л</span><span class="small p-meta muted">от <span class="p-min">10</span> шт · <span class="p-avail">в наличии</span></span></span>
+        <span class="price"><span class="p-price">65</span> сом</span>
+      </button>
+      <button class="card row rise prod" data-edit style="flex-direction:row;padding:14px;border:none;text-align:left">
+        <span class="pimg"><svg viewBox="0 0 64 64"><use href="#p-butter"/></svg></span>
+        <span class="grow"><span class="name p-name">Масло сливочное 82%, 200 г</span><span class="small p-meta muted">от <span class="p-min">10</span> шт · <span class="p-avail">в наличии</span></span></span>
+        <span class="price"><span class="p-price">145</span> сом</span>
+      </button>
+      <button class="card row rise prod" data-edit style="flex-direction:row;padding:14px;border:none;text-align:left">
+        <span class="pimg"><svg viewBox="0 0 64 64"><use href="#p-juice"/></svg></span>
+        <span class="grow"><span class="name p-name">Сок яблочный, 1 л</span><span class="small p-meta muted">от <span class="p-min">12</span> шт · <span class="p-avail">в наличии</span></span></span>
+        <span class="price"><span class="p-price">95</span> сом</span>
+      </button>
+      <button class="card row rise prod" data-edit style="flex-direction:row;padding:14px;border:none;text-align:left">
+        <span class="pimg"><svg viewBox="0 0 64 64"><use href="#p-sugar"/></svg></span>
+        <span class="grow"><span class="name p-name">Сахар, 1 кг</span><span class="small p-meta warn">от <span class="p-min">10</span> шт · <span class="p-avail">нет в наличии</span></span></span>
+        <span class="price muted"><span class="p-price">82</span> сом</span>
+      </button>
+      <button class="btn lg ghost rise" data-new><svg class="ic"><use href="#i-plus"/></svg>Добавить товар</button>
+    </div>
+    <nav class="tabbar" aria-label="Меню дистрибьютора">
+      <button class="tab" data-tab="d-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы<span class="badge-n dist-badge">3</span></button>
+      <button class="tab on" data-tab="d-catalog"><svg class="ic"><use href="#i-box"/></svg>Товары</button>
+      <button class="tab" data-tab="d-stores"><svg class="ic"><use href="#i-store"/></svg>Магазины</button>
+      <button class="tab" data-tab="d-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+
+  <!-- ========== АГЕНТ: МОИ ТОВАРЫ (агент сам ведёт товары и цены) ========== -->
+  <section class="screen" id="a-catalog" data-role="agent" hidden>
+    <header class="top">
+      <div class="grow"><span class="h1">Мои товары</span></div>
+      <label class="search"><svg class="ic"><use href="#i-search"/></svg><input type="search" aria-label="Поиск товара" placeholder="Название товара"></label>
+    </header>
+    <div class="body" style="gap:10px" id="a-product-list">
+      <button class="card row rise prod" data-edit style="flex-direction:row;padding:14px;border:none;text-align:left">
+        <span class="pimg"><svg viewBox="0 0 64 64"><use href="#p-milk"/></svg></span>
+        <span class="grow"><span class="name p-name">Молоко «Белая река» 3,2%, 1 л</span><span class="small p-meta muted">от <span class="p-min">10</span> шт · <span class="p-avail">в наличии</span></span></span>
+        <span class="price"><span class="p-price">72</span> сом</span>
+      </button>
+      <button class="card row rise prod" data-edit style="flex-direction:row;padding:14px;border:none;text-align:left">
+        <span class="pimg"><svg viewBox="0 0 64 64"><use href="#p-kefir"/></svg></span>
+        <span class="grow"><span class="name p-name">Кефир 2,5%, 1 л</span><span class="small p-meta muted">от <span class="p-min">10</span> шт · <span class="p-avail">в наличии</span></span></span>
+        <span class="price"><span class="p-price">65</span> сом</span>
+      </button>
+      <button class="card row rise prod" data-edit style="flex-direction:row;padding:14px;border:none;text-align:left">
+        <span class="pimg"><svg viewBox="0 0 64 64"><use href="#p-butter"/></svg></span>
+        <span class="grow"><span class="name p-name">Масло сливочное 82%, 200 г</span><span class="small p-meta muted">от <span class="p-min">10</span> шт · <span class="p-avail">в наличии</span></span></span>
+        <span class="price"><span class="p-price">145</span> сом</span>
+      </button>
+      <button class="card row rise prod" data-edit style="flex-direction:row;padding:14px;border:none;text-align:left">
+        <span class="pimg"><svg viewBox="0 0 64 64"><use href="#p-juice"/></svg></span>
+        <span class="grow"><span class="name p-name">Сок яблочный, 1 л</span><span class="small p-meta muted">от <span class="p-min">12</span> шт · <span class="p-avail">в наличии</span></span></span>
+        <span class="price"><span class="p-price">95</span> сом</span>
+      </button>
+      <button class="card row rise prod" data-edit style="flex-direction:row;padding:14px;border:none;text-align:left">
+        <span class="pimg"><svg viewBox="0 0 64 64"><use href="#p-sugar"/></svg></span>
+        <span class="grow"><span class="name p-name">Сахар, 1 кг</span><span class="small p-meta warn">от <span class="p-min">10</span> шт · <span class="p-avail">нет в наличии</span></span></span>
+        <span class="price muted"><span class="p-price">82</span> сом</span>
+      </button>
+      <button class="btn lg ghost rise" data-new><svg class="ic"><use href="#i-plus"/></svg>Добавить товар</button>
+    </div>
+    <nav class="tabbar five" aria-label="Меню агента">
+      <button class="tab" data-tab="a-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы<span class="badge-n agent-badge">2</span></button>
+      <button class="tab on" data-tab="a-catalog"><svg class="ic"><use href="#i-box"/></svg>Товары</button>
+      <button class="tab" data-tab="a-stores"><svg class="ic"><use href="#i-store"/></svg>Магазины</button>
+      <button class="tab" data-tab="a-route"><svg class="ic"><use href="#i-truck"/></svg>Доставка</button>
+      <button class="tab" data-tab="a-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+
+  <!-- ========== ДИСТРИБЬЮТОР: ТОВАР (ИЗМЕНИТЬ / ДОБАВИТЬ) ========== -->
+  <section class="screen" id="d-product" data-role="dist" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800" id="d-product-title">Товар</span>
+    </header>
+    <form class="body" id="d-price-form">
+      <div class="field rise">
+        <span class="label">Фото товара</span>
+        <div class="photo-prev" id="d-photo"></div>
+        <div class="row" style="gap:8px">
+          <label class="btn ghost" style="flex:1;height:48px"><svg class="ic"><use href="#i-camera"/></svg>Сфотографировать<input type="file" accept="image/*" capture="environment" hidden class="photo-input"></label>
+          <label class="btn ghost" style="flex:1;height:48px"><svg class="ic"><use href="#i-grid"/></svg>Из галереи<input type="file" accept="image/*" hidden class="photo-input"></label>
+        </div>
+        <span class="xs muted">С фото магазины узнают товар быстрее</span>
+      </div>
+      <div class="field rise"><label for="d-name">Название</label><input id="d-name" type="text"></div>
+      <div class="grid2 rise" style="gap:10px">
+        <div class="field"><label for="d-price">Цена за шт, сом</label><input id="d-price" type="text" inputmode="numeric"></div>
+        <div class="field"><label for="d-min">Мин. заказ, шт</label><input id="d-min" type="text" inputmode="numeric"></div>
+      </div>
+      <div class="card row rise" style="flex-direction:row;padding:14px">
+        <span class="grow"><span class="name">Есть в наличии</span><span class="small muted" id="d-avail-hint">Магазины видят товар и могут заказать</span></span>
+        <button type="button" class="toggle" id="d-avail" role="switch" aria-checked="true" aria-label="Есть в наличии"></button>
+      </div>
+      <button type="submit" class="btn lg rise" id="d-save">Сохранить</button>
+    </form>
+  </section>
+
+  <!-- ========== ДИСТРИБЬЮТОР: МАГАЗИНЫ ПО РАЙОНАМ ========== -->
+  <section class="screen" id="d-stores" data-role="dist" hidden>
+    <header class="top">
+      <div class="grow"><span class="h1">Магазины</span></div>
+      <div class="chips scroll" id="district-filter">
+        <button type="button" class="chip on" data-d="all">Все<span class="cnt" id="d-store-n">8</span></button>
+        <button type="button" class="chip" data-d="Октябрьский">Октябрьский</button>
+        <button type="button" class="chip" data-d="Свердловский">Свердловский</button>
+        <button type="button" class="chip" data-d="Первомайский">Первомайский</button>
+        <button type="button" class="chip" data-d="Ленинский">Ленинский</button>
+      </div>
+    </header>
+    <div class="body" style="gap:10px" id="d-store-list"></div>
+    <nav class="tabbar" aria-label="Меню дистрибьютора">
+      <button class="tab" data-tab="d-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы<span class="badge-n dist-badge">3</span></button>
+      <button class="tab" data-tab="d-catalog"><svg class="ic"><use href="#i-box"/></svg>Товары</button>
+      <button class="tab on" data-tab="d-stores"><svg class="ic"><use href="#i-store"/></svg>Магазины</button>
+      <button class="tab" data-tab="d-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+
+  <!-- ========== НОВЫЙ МАГАЗИН (агент и дистрибьютор) ========== -->
+  <section class="screen" id="store-new" data-role="agent" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800">Новый магазин</span>
+    </header>
+    <form class="body" id="store-form">
+      <div class="field sugg-wrap"><label for="ns-name">Название</label><input id="ns-name" type="text" autocomplete="off"><div class="sugg" id="ns-sugg" role="listbox" hidden></div></div>
+      <div class="field"><label for="ns-addr">Адрес</label><input id="ns-addr" type="text"></div>
+      <div class="field"><label for="ns-phone">Телефон</label><input id="ns-phone" type="tel" placeholder="+996"></div>
+      <div class="field" id="ns-district">
+        <span class="label">Район</span>
+        <div class="chips">
+          <button type="button" class="chip on" data-d="Октябрьский">Октябрьский</button>
+          <button type="button" class="chip" data-d="Свердловский">Свердловский</button>
+          <button type="button" class="chip" data-d="Первомайский">Первомайский</button>
+          <button type="button" class="chip" data-d="Ленинский">Ленинский</button>
+        </div>
+      </div>
+      <button type="submit" class="btn lg">Добавить магазин</button>
+    </form>
+  </section>
+
+  <!-- ========== АГЕНТ: ПРОФИЛЬ ========== -->
+  <section class="screen" id="a-profile" data-role="agent" hidden>
+    <header class="top">
+      <div class="row">
+        <div class="avatar">А</div>
+        <div class="grow"><span class="h1" style="font-size:20px">Азамат</span><span class="small muted agent-sub">Торговый агент · ОсОО «Дистрибьютор»</span></div>
+      </div>
+    </header>
+    <div class="body">
+      <div class="grid2 rise" style="gap:10px">
+        <div class="stat"><b class="a-store-n">5</b><span>Магазинов</span></div>
+        <div class="stat green"><b>41</b><span>Заказ за месяц</span></div>
+      </div>
+      <div class="card rise" style="gap:10px">
+        <span class="h2">Контакты</span>
+        <div class="between small"><span class="muted">Телефон</span><span class="bold">+996 555 12 34 56</span></div>
+        <div class="between small"><span class="muted">Район</span><span class="bold">Октябрьский</span></div>
+        <div class="between small" data-company><span class="muted">Руководитель</span><span class="bold">Бакыт Осмонов, +996 555 80 11 22</span></div>
+      </div>
+      <div class="list rise">
+        <button class="list-item" data-go="a-invoices"><svg class="ic"><use href="#i-pdf"/></svg><span class="grow">Накладные</span><svg class="ic chev"><use href="#i-next"/></svg></button>
+        <button class="list-item" data-go="a-settings"><svg class="ic"><use href="#i-user"/></svg><span class="grow">Настройки</span><svg class="ic chev"><use href="#i-next"/></svg></button>
+        <button class="list-item" data-go="docs"><svg class="ic"><use href="#i-doc"/></svg><span class="grow">Договоры и правила</span><svg class="ic chev"><use href="#i-next"/></svg></button>
+        <button class="list-item" data-toast="Чат поддержки — в следующей версии"><svg class="ic"><use href="#i-bell"/></svg><span class="grow">Поддержка</span><svg class="ic chev"><use href="#i-next"/></svg></button>
+      </div>
+      <div class="list rise">
+        <button class="list-item" data-logout style="color:#B42318"><span class="grow">Выйти</span></button>
+      </div>
+    </div>
+    <nav class="tabbar five" aria-label="Меню агента">
+      <button class="tab" data-tab="a-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы<span class="badge-n agent-badge">2</span></button>
+      <button class="tab" data-tab="a-catalog"><svg class="ic"><use href="#i-box"/></svg>Товары</button>
+      <button class="tab" data-tab="a-stores"><svg class="ic"><use href="#i-store"/></svg>Магазины</button>
+      <button class="tab" data-tab="a-route"><svg class="ic"><use href="#i-truck"/></svg>Доставка</button>
+      <button class="tab on" data-tab="a-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+
+
+  <!-- ========== МАГАЗИН: НАСТРОЙКИ ========== -->
+  <section class="screen" id="s-settings" data-role="shop" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800">Настройки</span>
+    </header>
+    <form class="body settings-form">
+      <div class="field"><label for="ss-name">Название магазина</label><input id="ss-name" type="text" value="Магазин «Айдана»"></div>
+      <div class="field"><label for="ss-addr">Адрес</label><input id="ss-addr" type="text" value="ул. Фрунзе, 88"></div>
+      <div class="field"><label for="ss-phone">Телефон</label><input id="ss-phone" type="tel" value="+996 "></div>
+      <div class="field"><span class="label">Язык</span>
+        <div class="seg lang-seg" role="radiogroup" aria-label="Язык"><button type="button" class="on">Русский</button><button type="button">Кыргызча</button></div>
+      </div>
+      <button type="button" class="btn lg ghost" data-toast="Смена пароля — в следующей версии">Сменить пароль</button>
+      <button type="submit" class="btn lg">Сохранить</button>
+    </form>
+  </section>
+
+  <!-- ========== ДОГОВОРЫ И ПРАВИЛА (все роли) ========== -->
+  <section class="screen" id="docs" data-role="shop" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800">Договоры и правила</span>
+    </header>
+    <div class="body">
+      <div class="list rise">
+        <button class="list-item" data-doc="oferta"><svg class="ic"><use href="#i-doc"/></svg><span class="grow">Публичная оферта</span><svg class="ic chev"><use href="#i-next"/></svg></button>
+        <button class="list-item" data-doc="user_agreement_zakup_kg"><svg class="ic"><use href="#i-doc"/></svg><span class="grow">Пользовательское соглашение</span><svg class="ic chev"><use href="#i-next"/></svg></button>
+        <button class="list-item" data-doc="privacy"><svg class="ic"><use href="#i-doc"/></svg><span class="grow">Политика конфиденциальности</span><svg class="ic chev"><use href="#i-next"/></svg></button>
+      </div>
+    </div>
+  </section>
+  <section class="screen" id="doc-view" data-role="shop" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800" id="doc-title"></span>
+    </header>
+    <div class="body"><div class="card doc" id="doc-body"></div></div>
+  </section>
+<template id="doc-oferta">
+<p><b>на оказание услуг по предоставлению доступа к B2B-платформе «Zakup.KG»</b></p>
+<p>г. Бишкек, Кыргызская Республика<br>Редакция от «13» Ноябрь 2026 г.</p>
+<p>Индивидуальный предприниматель <b>Бакытбек уулу Бексултан</b>, действующий на основании Свидетельства о государственной регистрации № <b>003-2024-169-8638</b> от <b>2024-11-26</b>, ИНН <b>12345678901234</b> (далее — <b>«Исполнитель»</b>), публикует настоящую Публичную оферту (далее — <b>«Оферта»</b>) в адрес юридических лиц и индивидуальных предпринимателей (далее — <b>«Пользователи»</b>).</p>
+<h2>1. Термины и определения</h2>
+<p>1.1. <b>Платформа</b> — программный комплекс (мобильное приложение и веб-сервис) «Zakup.KG», предназначенный для размещения оптовых прайс-листов и оформления заявок на поставку товаров.<br>1.2. <b>Магазин (Покупатель)</b> — ИП или юридическое лицо, приобретающее товары через Платформу для осуществления розничной торговли.<br>1.3. <b>Поставщик</b> — ИП или юридическое лицо, размещающее на Платформе информацию о своих товарах и ценах для получения заявок от Магазинов.<br>1.4. <b>Акцепт Оферты</b> — полное и безоговорочное принятие условий Оферты путем регистрации на Платформе, нажатия кнопки подтверждения или оплаты выбранного тарифа.</p>
+<h2>2. Предмет договора</h2>
+<p>2.1. Исполнитель предоставляет Пользователю право использования функционала Платформы на условиях простой (неисключительной) лицензии, а также оказывает информационно-технические услуги по продвижению товаров на Платформе.<br>2.2. Исполнитель <b>не является</b> стороной договоров купли-продажи (поставки), заключаемых между Магазином и Поставщиком, не участвует в расчетах за товар, не осуществляет доставку и не несет ответственности за качество, сроки и комплектность поставляемого товара.</p>
+<h2>3. Тарифы и порядок расчетов</h2>
+<p>3.1. <b>Для Магазинов:</b> использование базового функционала Платформы (просмотр каталога, оформление заявок) предоставляется на безвозмездной основе (<b>0 сомов</b>).<br>3.2. <b>Для Поставщиков:</b> доступ к функционалу приема заявок предоставляется на выбор по одному из следующих тарифных планов:</p>
+<ul><li><b>Тариф «Процент с заказа»:</b> абонентская плата составляет <b>0 сомов</b>. С внутреннего баланса Поставщика списывается комиссия в размере <b>3% (трех процентов)</b> от общей суммы каждой заявки, подтвержденной Поставщиком (нажатием кнопки «Принять заказ»). Поставщик обязан поддерживать положительный баланс для получения контактов Магазина и принятия заявок.</li><li><b>Тариф «Безлимит»:</b> фиксированная абонентская плата в размере <b>2 500 (две тысячи пятьсот) сомов</b> за 30 (тридцать) календарных дней. Предоставляет право на прием неограниченного количества заявок без списания комиссии с суммы заказа.</li></ul>
+<p>3.3. <b>Дополнительные рекламные услуги для Поставщиков</b> (подключаются по желанию и при наличии технической возможности):</p>
+<ul><li>Закрепление карточки Поставщика или товара в верхней части категории («Топ») — <b>1 500 сомов</b> за 7 календарных дней.</li><li>Отправка информационного Push-уведомления об акциях по базе Магазинов — от <b>500 до 1 000 сомов</b> за одну рассылку согласно актуальным тарифам в личном кабинете.</li></ul>
+<p>3.4. Оплата услуг производится в национальной валюте Кыргызской Республики (сомах) путем безналичного перечисления на расчетный счет Исполнителя либо через платежные сервисы (QR-код, электронные кошельки, банковские карты).<br>3.5. Услуги считаются оказанными надлежащим образом в момент зачисления средств на внутренний баланс Поставщика или активации выбранного тарифного плана. Денежные средства за активированные периоды подписки и принятые заявки возврату не подлежат.</p>
+<h2>4. Права и обязанности сторон</h2>
+<p>4.1. <b>Поставщик обязуется:</b></p>
+<ul><li>Размещать достоверную информацию о товарах, их наличии и актуальных оптовых ценах в сомах.</li><li>Своевременно обрабатывать поступающие заявки и не допускать умышленного занижения суммы заказа с целью уменьшения комиссии по тарифу «Процент с заказа».</li></ul>
+<p>4.2. <b>Исполнитель вправе:</b></p>
+<ul><li>Приостановить доступ Поставщика к Платформе при нулевом балансе, нарушении условий Оферты или поступлении обоснобленных жалоб от Магазинов на несоответствие цен.</li><li>В одностороннем порядке изменять тарифы, уведомив Пользователей через Платформу не менее чем за 5 (пять) календарных дней до вступления изменений в силу.</li></ul>
+<h2>5. Ответственность и разрешение споров</h2>
+<p>5.1. Платформа предоставляется по принципу «как есть» (as is). Исполнитель не несет ответственности за временные технические сбои в работе сети Интернет или мобильных операторов.<br>5.2. Все споры разрешаются путем переговоров, а при недостижении согласия — в судебном порядке в соответствии с законодательством Кыргызской Республики по месту регистрации Исполнителя.</p>
+<h2>6. Реквизиты Исполнителя</h2>
+<ul><li><b>Наименование:</b> ИП Бакытбек уулу Бексултан</li><li><b>ИНН:</b> 12345678901234</li><li><b>Юридический адрес:</b> Кыргызская Республика, г. Бишкек, Свердловский р-н, Полевая (с. Нижняя Аларча) ул., дом .</li><li><b>Расчетный счет:</b> 80800320003655417, БИК 808003</li><li><b>Телефон / WhatsApp:</b> +996 123 45-67-89</li><li><b>Email:</b> test@test.test</li></ul>
+</template>
+<template id="doc-user_agreement_zakup_kg">
+<p><b>Дата вступления в силу:</b> 13 Ноябрь 2026 г.<br><b>Территория действия:</b> Кыргызская Республика</p>
+<h2>1. Общие положения</h2>
+<p>1.1. Настоящее Пользовательское соглашение (далее — «Соглашение») регулирует порядок использования кроссплатформенного B2B-сервиса <b>Zakup.KG</b> (далее — «Платформа»).<br>1.2. Платформа предназначена для автоматизации процессов закупки и поставки товаров между розничными торговыми точками (магазинами, павильонами, ларьками, гипермаркетами — далее «Магазины») и оптовыми дистрибьюторами или производителями товаров (далее — «Поставщики»).<br>1.3. Прохождение процедуры регистрации в приложении означает полное и безоговорочное принятие Пользователем (Магазином или Поставщиком) всех условий настоящего Соглашения.</p>
+<h2>2. Статус Платформы</h2>
+<p>2.1. <b>Zakup.KG</b> выступает исключительно в качестве информационно-технологического посредника («цифрового моста»), обеспечивающего передачу заявок и обмен данными между Магазинами и Поставщиками.<br>2.2. Администрация Платформы не является стороной договоров купли-продажи или поставки, не выступает продавцом товаров, не осуществляет их хранение, транспортировку и прием денежных средств за отгруженную продукцию.<br>2.3. Все коммерческие условия (цены, минимальная сумма заказа, сроки доставки, формы оплаты и порядок возврата брака) согласовываются и исполняются напрямую между Магазином и Поставщиком.</p>
+<h2>3. Регистрация и учетная запись</h2>
+<p>3.1. Для доступа к функционалу Платформы Пользователь обязуется выбрать соответствующую роль («Магазин» или «Поставщик») и предоставить достоверные регистрационные данные:</p>
+<ul><li>Для Магазина: наименование торговой точки, ИНН/ПИН, фактический адрес доставки и контактный номер телефона.</li><li>Для Поставщика: официальное наименование организации, ИНН, юридический/складской адрес и контактные данные.</li></ul>
+<p>3.2. Пользователь несет полную ответственность за сохранность своего пароля и за все действия, совершенные под его учетной записью.<br>3.3. Администрация Платформы оставляет за собой право заблокировать или удалить учетную запись при выявлении недостоверных реквизитов, фиктивных заказов или нарушении правил работы сервиса.</p>
+<h2>4. Порядок формирования и исполнения заявок</h2>
+<p>4.1. Оформление и отправка заявки через интерфейс <b>Zakup.KG</b> является официальным подтверждением намерения Магазина принять и оплатить заказанный ассортимент на условиях выбранного Поставщика.<br>4.2. Поставщик обязуется своевременно обрабатывать поступающие заявки, поддерживать актуальность своего цифрового каталога, остатков и цен в системе.<br>4.3. Платформа не несет ответственности за задержки доставки, недовложения или ненадлежащее качество товара со стороны Поставщика, а также за отказ Магазина от приемки и оплаты подтвержденного заказа.</p>
+<h2>5. Интеллектуальная собственность</h2>
+<p>5.1. Все элементы дизайна, логотип <b>Zakup.KG</b>, программный код, базы данных, архитектура и текстовые материалы Платформы являются интеллектуальной собственностью правообладателя и охраняются законодательством Кыргызской Республики.<br>5.2. Запрещается копирование, декомпиляция, парсинг каталогов, модификация или коммерческое использование материалов Платформы без письменного согласия Администрации.</p>
+<h2>6. Конфиденциальность и обработка данных</h2>
+<p>6.1. Принимая настоящее Соглашение, Пользователь дает согласие на сбор, хранение и обработку предоставленных регистрационных и контактных данных в соответствии с Законом Кыргызской Республики «Об информации персонального характера».<br>6.2. Пользователь соглашается на передачу своих контактных данных, реквизитов и адреса доставки контрагентам (Поставщикам или Магазинам) исключительно в рамках исполнения оформленных через Платформу заявок.</p>
+<h2>7. Заключительные положения</h2>
+<p>7.1. На этапе тестирования и запуска (MVP) базовый функционал Платформы предоставляется по принципу «как есть» (as is).<br>7.2. Администрация вправе в одностороннем порядке вносить изменения в настоящее Соглашение. Новая редакция вступает в силу с момента ее публикации в приложении <b>Zakup.KG</b>.<br>7.3. Все споры и разногласия разрешаются путем переговоров, а при недостижении согласия — в порядке, установленном действующим законодательством Кыргызской Республики.</p>
+</template>
+<template id="doc-privacy">
+<p><b>и обработки персональных данных пользователей Платформы «Zakup.KG»</b></p>
+<p>г. Бишкек, Кыргызская Республика<br>Редакция от «13» Ноябрь 2026 г.</p>
+<p>Настоящая Политика конфиденциальности разработана в соответствии с Законом Кыргызской Республики «Об информации персонального характера» и определяет порядок сбора, хранения и защиты данных пользователей мобильного приложения и сервиса «Zakup.KG» (далее — <b>«Платформа»</b>).</p>
+<h2>1. Какие данные мы собираем</h2>
+<p>1.1. При регистрации и использовании Платформы ИП <b>Бакытбек уулу Бексултан</b> (далее — <b>«Оператор»</b>) собирает следующие данные:</p>
+<ul><li>Фамилия, имя, отчество контактного лица или руководителя;</li><li>Наименование торговой точки или компании, ИНН;</li><li>Номер контактного телефона (в том числе привязанный к мессенджерам WhatsApp/Telegram);</li><li>Фактический адрес доставки / расположения магазина или склада, геолокация (для отображения на карте и формирования маршрутов доставки);</li><li>История оформленных и принятых заявок, сведения о платежах за услуги Платформы.</li></ul>
+<p>1.2. Технические данные: IP-адрес, модель устройства, версия операционной системы, push-токены для отправки уведомлений.</p>
+<h2>2. Цели сбора и обработки данных</h2>
+<p>2.1. Оператор обрабатывает данные исключительно для:</p>
+<ul><li>Регистрации и идентификации Магазинов и Поставщиков на Платформе;</li><li>Передачи контактных данных и адреса Магазина выбранному Поставщику в целях исполнения оформленной заявки на поставку товара;</li><li>Ведения взаиморасчетов, учета баланса и формирования бухгалтерской отчетности;</li><li>Отправки сервисных и рекламных Push-уведомлений (об изменении статуса заказа, новых прайс-листах и акциях Поставщиков);</li><li>Технической поддержки и предотвращения мошеннических действий.</li></ul>
+<h2>3. Передача данных третьим лицам</h2>
+<p>3.1. Оператор не продает и не передает персональные данные третьим лицам, за исключением случаев, прямо необходимых для работы Платформы:</p>
+<ul><li>Передача имени, телефона и адреса Магазина конкретному Поставщику в момент оформления заказа;</li><li>Передача сведений государственным органам КР по официальному запросу в рамках действующего законодательства.</li></ul>
+<h2>4. Защита и хранение данных</h2>
+<p>4.1. Оператор принимает необходимые технические и организационные меры для защиты данных от неправомерного доступа, утечки или уничтожения.<br>4.2. Данные хранятся в течение всего срока действия учетной записи Пользователя на Платформе.</p>
+<h2>5. Права пользователя и отзыв согласия</h2>
+<p>5.1. Пользователь вправе в любой момент обновить свои данные в личном кабинете, отказаться от получения рекламных уведомлений или потребовать удаления своей учетной записи и персональных данных, направив запрос на электронную почту <b>test@test.test</b> или в службу поддержки в WhatsApp по номеру <b>+996 123 45-67-89</b>.</p>
+</template>
+
+  <!-- ========== АГЕНТ: НАКЛАДНЫЕ ========== -->
+  <section class="screen" id="a-invoices" data-role="agent" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800">Накладные</span>
+    </header>
+    <div class="body" id="a-inv-list" style="gap:10px"></div>
+  </section>
+
+  <!-- ========== АГЕНТ: НАСТРОЙКИ ========== -->
+  <section class="screen" id="a-settings" data-role="agent" hidden>
+    <header class="top" style="flex-direction:row;align-items:center;gap:8px">
+      <button class="icon-btn" data-back aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+      <span style="font-size:18px;font-weight:800">Настройки</span>
+    </header>
+    <form class="body" id="a-settings-form">
+      <div class="field"><label for="as-name">Имя</label><input id="as-name" type="text" value="Азамат"></div>
+      <div class="field"><label for="as-phone">Телефон</label><input id="as-phone" type="tel" value="+996 "></div>
+      <div class="field"><span class="label">Язык</span>
+        <div class="seg lang-seg" role="radiogroup" aria-label="Язык"><button type="button" class="on">Русский</button><button type="button">Кыргызча</button></div>
+      </div>
+      <button type="button" class="btn lg ghost" data-toast="Смена пароля — в следующей версии">Сменить пароль</button>
+      <button type="submit" class="btn lg">Сохранить</button>
+    </form>
+  </section>
+
+  <!-- ========== ДИСТРИБЬЮТОР: ПРОФИЛЬ ========== -->
+  <section class="screen" id="d-profile" data-role="dist" hidden>
+    <header class="top">
+      <div class="row">
+        <div class="avatar">Д</div>
+        <div class="grow"><span class="h1" style="font-size:20px">ОсОО «Дистрибьютор»</span><span class="small muted">Филиал Бишкек · 8 магазинов</span></div>
+      </div>
+    </header>
+    <div class="body">
+      <div class="card rise" style="gap:10px">
+        <div class="between"><span class="h2">Реквизиты</span><button type="button" class="btn ghost" data-toast="Изменение реквизитов — в следующей версии" style="height:36px;font-size:13px">Изменить</button></div>
+        <div class="between small"><span class="muted">ИНН</span><span class="bold">02305199010045</span></div>
+        <div class="between small"><span class="muted">Адрес склада</span><span class="bold">г. Бишкек, пр. Чуй, 154</span></div>
+        <div class="between small"><span class="muted">Телефон офиса</span><span class="bold">+996 700 48 21 90</span></div>
+        <span class="xs muted">Эти данные печатаются в накладной</span>
+      </div>
+      <div class="card rise" style="gap:10px">
+        <span class="h2">Районы доставки</span>
+        <div class="chips">
+          <span class="pill green">Октябрьский</span><span class="pill green">Свердловский</span><span class="pill green">Первомайский</span><span class="pill green">Ленинский</span>
+        </div>
+        <div class="between small"><span class="muted">Оплата</span><span class="bold">При получении</span></div>
+      </div>
+      <div class="list rise">
+        <div class="list-item" style="cursor:default"><svg class="ic"><use href="#i-globe"/></svg><span class="grow">Язык</span>
+          <div class="seg lang-seg" role="radiogroup" aria-label="Язык" style="width:150px;padding:3px"><button type="button" class="on" style="height:34px;font-size:13px">Рус</button><button type="button" style="height:34px;font-size:13px">Кыр</button></div>
+        </div>      </div>
+      <div class="list rise">
+        <button class="list-item" data-go="docs"><svg class="ic"><use href="#i-doc"/></svg><span class="grow">Договоры и правила</span><svg class="ic chev"><use href="#i-next"/></svg></button>
+      </div>
+      <div class="list rise">
+        <button class="list-item" data-logout style="color:#B42318"><span class="grow">Выйти</span></button>
+      </div>
+    </div>
+    <nav class="tabbar" aria-label="Меню дистрибьютора">
+      <button class="tab" data-tab="d-orders"><svg class="ic"><use href="#i-doc"/></svg>Заказы<span class="badge-n dist-badge">3</span></button>
+      <button class="tab" data-tab="d-catalog"><svg class="ic"><use href="#i-box"/></svg>Товары</button>
+      <button class="tab" data-tab="d-stores"><svg class="ic"><use href="#i-store"/></svg>Магазины</button>
+      <button class="tab on" data-tab="d-profile"><svg class="ic"><use href="#i-user"/></svg>Профиль</button>
+    </nav>
+  </section>
+</div>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-pdf" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-bottle" viewBox="0 0 24 24"><path d="M9 2h6v3l2 3v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8l2-3z"/><path d="M7 12h10"/></symbol>
+  <symbol id="i-bread" viewBox="0 0 24 24"><path d="M5 11a7 4 0 0 1 14 0v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M9 9v3M12 8v3M15 9v3"/></symbol>
+  <symbol id="i-butter" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="2"/><path d="M7 8V6h10v2"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+  <symbol id="i-store" viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></symbol>
+  <symbol id="i-sync" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol>
+  <!-- Упаковки товаров (заглушки вместо фото в демо) -->
+  <symbol id="p-cookie" viewBox="0 0 64 64"><circle cx="32" cy="32" r="20" fill="#E9B872" stroke="#8A5A12" stroke-width="2"/><circle cx="25" cy="26" r="2.5" fill="#6B3E12"/><circle cx="37" cy="24" r="2" fill="#6B3E12"/><circle cx="39" cy="37" r="2.5" fill="#6B3E12"/><circle cx="27" cy="39" r="2" fill="#6B3E12"/></symbol>
+  <symbol id="p-bread" viewBox="0 0 64 64"><path d="M10 30c0-9 10-14 22-14s22 5 22 14c0 3-2 4-4 4v14a3 3 0 0 1-3 3H17a3 3 0 0 1-3-3V34c-2 0-4-1-4-4z" fill="#F5C77E" stroke="#8A5A12" stroke-width="2" stroke-linejoin="round"/><path d="M24 24l-3 6M33 22l-3 7M42 24l-3 6" stroke="#8A5A12" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="p-milk" viewBox="0 0 64 64"><path d="M21 19 26 8h12l5 11v37a2 2 0 0 1-2 2H23a2 2 0 0 1-2-2z" fill="#fff" stroke="#2B5C8F" stroke-width="2" stroke-linejoin="round"/><path d="M21 19h22M26 8l-1 11M38 8l1 11" stroke="#2B5C8F" stroke-width="2" fill="none"/><rect x="21" y="30" width="22" height="16" fill="#2B5C8F"/><path d="M32 33c-3 4-4 6-4 7.5a4 4 0 0 0 8 0c0-1.5-1-3.5-4-7.5z" fill="#fff"/></symbol>
+  <symbol id="p-kefir" viewBox="0 0 64 64"><rect x="27" y="4" width="10" height="6" rx="1.5" fill="#15803D"/><path d="M27 10h10v6l5 7v33a2 2 0 0 1-2 2H24a2 2 0 0 1-2-2V23l5-7z" fill="#fff" stroke="#15803D" stroke-width="2" stroke-linejoin="round"/><rect x="22" y="31" width="20" height="15" fill="#15803D"/><path d="M26 38h12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></symbol>
+  <symbol id="p-butter" viewBox="0 0 64 64"><path d="M8 26l6-6h36l6 6v18a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3z" fill="#FDE68A" stroke="#A16207" stroke-width="2" stroke-linejoin="round"/><path d="M8 26h48" stroke="#A16207" stroke-width="2"/><rect x="20" y="30" width="24" height="12" rx="2" fill="#fff"/><path d="M25 36h14" stroke="#A16207" stroke-width="2.5" stroke-linecap="round"/></symbol>
+  <symbol id="p-juice" viewBox="0 0 64 64"><path d="M40 4l-3 9" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round"/><path d="M18 14l4-4h20l4 4v42a2 2 0 0 1-2 2H20a2 2 0 0 1-2-2z" fill="#FEF3C7" stroke="#B45309" stroke-width="2" stroke-linejoin="round"/><circle cx="32" cy="36" r="9" fill="#DC2626"/><path d="M32 27c0-3 2-5 5-5-0.5 3-2.5 5-5 5z" fill="#15803D"/><path d="M28 33a3 3 0 0 1 3-2" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></symbol>
+  <symbol id="p-sugar" viewBox="0 0 64 64"><path d="M16 12h32l-2 6 3 36a2 2 0 0 1-2 2H17a2 2 0 0 1-2-2l3-36z" fill="#fff" stroke="#6B7280" stroke-width="2" stroke-linejoin="round"/><path d="M18 18h28" stroke="#6B7280" stroke-width="2"/><rect x="20" y="28" width="24" height="16" rx="2" fill="#2563EB"/><rect x="25" y="32" width="6" height="6" rx="1" fill="#fff"/><rect x="33" y="32" width="6" height="6" rx="1" fill="#fff"/></symbol>
+  <symbol id="p-smetana" viewBox="0 0 64 64"><ellipse cx="32" cy="18" rx="20" ry="5" fill="#7C3AED"/><path d="M12 18l4 34a3 3 0 0 0 3 3h26a3 3 0 0 0 3-3l4-34" fill="#fff" stroke="#7C3AED" stroke-width="2" stroke-linejoin="round"/><rect x="17" y="30" width="30" height="12" fill="#7C3AED"/><path d="M24 36h16" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6-7-11.5a7 7 0 0 1 14 0C19 15 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="4"/></symbol>
+</svg>
+
+<script>
+(function () {
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const fmt = n => n.toLocaleString('ru-RU');
+
+  let current_id = 'version';
+  const history = [];
+  const lastScreen = { shop: 's-home', agent: 'a-orders', dist: 'd-orders' };
+  const homeOf = { shop: 's-home', agent: 'a-orders', dist: 'd-orders' };
+  let role = 'shop';
+
+  function animateIn(el, cls) {
+    el.hidden = false;
+    el.classList.remove('in-right','in-left','out-left','out-right','fade-in','anim');
+    void el.offsetWidth;
+    el.classList.add(cls, 'anim');
+  }
+  function animateOut(el, cls) {
+    el.classList.remove('in-right','in-left','out-left','out-right','fade-in','anim');
+    void el.offsetWidth;
+    el.classList.add(cls);
+    setTimeout(() => { if (el.id !== current_id) el.hidden = true; el.classList.remove(cls); }, 380);
+  }
+
+  // dir: 'push' (вперёд), 'back' (назад), 'fade' (смена вкладки/роли)
+  function go(id, dir) {
+    if (id === current_id) return;
+    const from = $('#' + current_id), to = $('#' + id);
+    if (id === 's-invoice') { renderInvoice(pendingInv || shopInv); pendingInv = null; }
+    if (id === 'a-invoices') renderInvoiceList();
+    if (dir === 'push') { history.push(current_id); animateOut(from, 'out-left'); animateIn(to, 'in-right'); }
+    else if (dir === 'back') { animateOut(from, 'out-right'); animateIn(to, 'in-left'); }
+    else { history.length = 0; from.hidden = true; animateIn(to, 'fade-in'); }
+    current_id = id;
+    if (dir === 'fade') lastScreen[to.dataset.role] = id;
+  }
+
+  // Навигация
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-go],[data-back],[data-tab],[data-toast]');
+    if (!t) return;
+    if (t.dataset.go) go(t.dataset.go, 'push');
+    else if (t.hasAttribute('data-back')) go(history.pop() || homeOf[role], 'back');
+    else if (t.dataset.tab) go(t.dataset.tab, 'fade');
+    else if (t.dataset.toast) toast(t.dataset.toast);
+  });
+
+  // Тост
+  let toastTimer;
+  function toast(text) {
+    $('#toast-text').textContent = text;
+    $('#toast').classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => $('#toast').classList.remove('show'), 2200);
+  }
+
+  // Роли
+  function setRole(r) {
+    role = r;
+    go(lastScreen[r], 'fade');
+  }
+  $$('[data-role-go]').forEach(b => b.addEventListener('click', () => setRole(b.dataset.roleGo)));
+
+  // Поставщик и количество
+  let qty = 20, price = 72, sup = $('.supplier.on');
+  function bump(el) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+  function renderTotal() {
+    if (document.activeElement !== $('#qty')) $('#qty').value = qty;
+    $('#total').textContent = fmt(qty * price); bump($('#total'));
+  }
+  $$('.supplier').forEach(b => b.addEventListener('click', () => {
+    $$('.supplier').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); sup = b; price = +b.dataset.price; renderTotal();
+  }));
+  $('#qty-minus').addEventListener('click', () => { if (qty > 1) { qty--; renderTotal(); } });
+  $('#qty-plus').addEventListener('click', () => { qty++; renderTotal(); });
+  // Количество можно ввести руками
+  $('#qty').addEventListener('input', () => { const v = parseInt($('#qty').value, 10); if (v >= 1) { qty = v; renderTotal(); } });
+  $('#qty').addEventListener('change', () => { $('#qty').value = qty; });
+
+  // Оформление заказа
+  $('#place-order').addEventListener('click', () => {
+    const b = $('#place-order');
+    b.textContent = 'Оформляем…';
+    setTimeout(() => {
+      $$('.sup-name').forEach(e => e.textContent = sup.dataset.name);
+      $$('.sup-when').forEach(e => e.textContent = sup.dataset.when);
+      $$('.sum-qty').forEach(e => e.textContent = qty);
+      $$('.sum-price').forEach(e => e.textContent = price);
+      $$('.sum-total').forEach(e => e.textContent = fmt(qty * price));
+      shopInv.items[0].q = qty; shopInv.items[0].p = price; shopInv.releasedBy = sup.dataset.name;
+      addShopOrder(sup.dataset.name, sup.dataset.when, [{ name: 'Молоко «Белая река» 3,2%, 1 л', q: qty, p: price, img: 'milk' }]);
+      b.textContent = 'Заказать';
+      const badge = $('#shop-badge'); badge.hidden = false; badge.classList.add('pop');
+      go('s-success', 'push');
+    }, 600);
+  });
+
+  // Чипы: выбор одного в группе
+  $$('.chip').forEach(c => c.addEventListener('click', () => {
+    $$('.chip', c.parentElement).forEach(x => x.classList.remove('on')); c.classList.add('on');
+  }));
+
+  // Кнопки магазина
+  $('#try-batch').addEventListener('click', () => {
+    toast('Пробная партия 12 шт заказана у агента Нурлана');
+    go(history.pop() || 's-home', 'back');
+  });
+  $('#share-invoice').addEventListener('click', () => toast('PDF накладной готов к отправке'));
+
+  // ===== Накладная: одна на все роли, собирается из заказа =====
+  // Поставщик в накладной — юрлицо дистрибьютора; агент или склад — только «Отпустил».
+  const SUPPLIER = { name: 'ОсОО «Дистрибьютор»', details: 'ИНН 02305199010045 · г. Бишкек, ул. Льва Толстого, 36' };
+  const shopInv = {
+    n: '0001', date: '14.11.2026', shop: 'Магазин «Айдана»', addr: 'ул. Исанова, 61', releasedBy: 'Агент Азамат',
+    items: [{ name: 'Молоко «Белая река» 3,2%, 1 л', q: 20, p: 72 }]
+  };
+  let pendingInv = null;   // накладная, которую открыли из карточки заказа агента или дистрибьютора
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function renderInvoice(inv) {
+    const sum = inv.items.reduce((s, i) => s + i.q * i.p, 0), from = inv.supplier || SUPPLIER;
+    $('#invoice-title').textContent = 'Накладная № ' + inv.n;
+    $('#invoice-paper').innerHTML =
+      '<div class="card rise inv">' +
+      '<div class="between" style="align-items:flex-start"><span style="font-size:16px;font-weight:800">ТОВАРНАЯ НАКЛАДНАЯ</span>' +
+      '<span class="xs muted" style="text-align:right">№ ' + inv.n + '<br>от ' + inv.date + '</span></div>' +
+      '<div class="divider"></div>' +
+      '<div class="inv-party"><span class="xs muted bold">Поставщик</span><span class="bold">' + from.name + '</span><span class="xs muted">' + from.details + '</span></div>' +
+      '<div class="inv-party"><span class="xs muted bold">Получатель</span><span class="bold">' + esc(inv.shop) + '</span><span class="xs muted">' + esc(inv.addr) + '</span></div>' +
+      '<table class="inv-t"><thead><tr><th>№</th><th>Наименование</th><th class="r">Кол-во</th><th class="r">Цена</th><th class="r">Сумма</th></tr></thead><tbody>' +
+      inv.items.filter(i => i.q > 0).map((i, k) => '<tr><td>' + (k + 1) + '</td><td>' + esc(i.name) + '</td><td class="r">' + i.q + ' шт</td><td class="r">' + i.p + '</td><td class="r">' + fmt(i.q * i.p) + '</td></tr>').join('') +
+      '</tbody></table>' +
+      '<div class="divider"></div>' +
+      '<div class="between"><span class="bold" style="font-size:15px">Итого</span><span class="price">' + fmt(sum) + ' сом</span></div>' +
+      '<div class="between xs"><span class="muted">Оплата</span><span class="bold">при получении</span></div>' +
+      '<div class="inv-sign"><div><span class="xs muted">Отпустил</span><span class="small bold">' + esc(inv.releasedBy) + '</span><span class="line"></span></div>' +
+      '<div><span class="xs muted">Принял</span><span class="small bold">Представитель магазина</span><span class="line"></span></div></div>' +
+      '</div>';
+  }
+
+  // ===== Заказы: общая логика для агента и дистрибьютора =====
+  // Статусы: new → confirmed → delivering → delivered; отдельно rejected
+  const ST = {
+    new: ['warn', 'Новый'], confirmed: ['green', 'Подтверждён'], delivering: ['amber', 'В пути'],
+    delivered: ['grey', 'Доставлен'], rejected: ['grey', 'Отклонён']
+  };
+  const ORDER = { new: 0, confirmed: 1, delivering: 2, delivered: 3, rejected: 4 };
+  const NEXT = {
+    confirmed: ['delivering', 'Отправить в путь', 'Заказ в пути · магазин получил уведомление'],
+    delivering: ['delivered', 'Доставлен и оплачен', 'Заказ доставлен и оплачен']
+  };
+  const REASONS = ['Нет товара', 'Не доставляем в этот район', 'Меньше минимального заказа', 'Другое'];
+
+  const it = (name, q, p, img) => ({ name, q, p, img, q0: q });   // q0 — сколько заказал магазин
+  const pic = (key, cls) => '<span class="pimg' + (cls ? ' ' + cls : '') + '"><svg viewBox="0 0 64 64"><use href="#p-' + key + '"/></svg></span>';
+  const orders = {
+    agent: [
+      { n: '0142', shop: 'Магазин «Достук»', addr: 'ул. Московская, 203', area: 'Октябрьский р-н', ago: '5 мин назад', when: 'завтра до 12:00', st: 'new',
+        items: [it('Молоко «Белая река» 3,2%, 1 л', 20, 72, 'milk'), it('Кефир 2,5%, 1 л', 10, 65, 'kefir')] },
+      { n: '0141', shop: 'Минимаркет «Ала-Тоо»', addr: 'ул. Боконбаева, 17', area: 'Октябрьский р-н', ago: '22 мин назад', when: 'завтра до 12:00', st: 'new',
+        items: [it('Сметана 20%, 400 г', 12, 90, 'smetana')] },
+      { n: '0140', shop: 'Продукты «Нур»', addr: 'ул. Ахунбаева, 112', area: 'Октябрьский р-н', ago: 'вчера', when: 'завтра до 12:00', st: 'confirmed',
+        items: [it('Молоко «Белая река» 3,2%, 1 л', 30, 72, 'milk'), it('Масло сливочное 82%, 200 г', 6, 145, 'butter')] },
+      { n: '0139', shop: 'Магазин «Береке»', addr: 'ул. Токтогула, 45', area: 'Октябрьский р-н', ago: 'вчера', when: 'завтра до 12:00', st: 'confirmed',
+        items: [it('Кефир 2,5%, 1 л', 20, 65, 'kefir')] },
+      { n: '0137', shop: 'Магазин «Асель»', addr: 'ул. Байтик Баатыра, 7', area: 'Октябрьский р-н', ago: '3 дня назад', when: '12 ноября', st: 'delivered',
+        items: [it('Сахар, 1 кг', 30, 82, 'sugar')] }
+    ],
+    dist: [
+      { n: '0215', shop: 'Магазин «Достук»', addr: 'ул. Ибраимова, 29', area: 'Октябрьский р-н', ago: '5 мин назад', when: 'завтра до 12:00', st: 'new',
+        items: [it('Молоко «Белая река» 3,2%, 1 л', 20, 72, 'milk'), it('Кефир 2,5%, 1 л', 10, 65, 'kefir')] },
+      { n: '0214', shop: 'Минимаркет «Ала-Тоо»', addr: 'ул. Жибек Жолу, 310', area: 'Свердловский р-н', ago: '22 мин назад', when: 'завтра до 12:00', st: 'new',
+        items: [it('Сметана 20%, 400 г', 12, 90, 'smetana')] },
+      { n: '0213', shop: 'Магазин «Жибек»', addr: 'ул. Фрунзе, 88', area: 'Ленинский р-н', ago: '40 мин назад', when: 'завтра до 15:00', st: 'new',
+        items: [it('Сок яблочный, 1 л', 24, 95, 'juice'), it('Масло сливочное 82%, 200 г', 10, 145, 'butter')] },
+      { n: '0212', shop: 'Продукты «Нур»', addr: 'пр. Чуй, 154', area: 'Первомайский р-н', ago: 'вчера', when: 'сегодня до 18:00', st: 'delivering',
+        items: [it('Молоко «Белая река» 3,2%, 1 л', 30, 72, 'milk'), it('Масло сливочное 82%, 200 г', 6, 145, 'butter')] },
+      { n: '0211', shop: 'Магазин «Береке»', addr: 'ул. Исанова, 61', area: 'Ленинский р-н', ago: 'вчера', when: 'завтра до 12:00', st: 'confirmed',
+        items: [it('Кефир 2,5%, 1 л', 20, 65, 'kefir')] },
+      { n: '0209', shop: 'Магазин «Асель»', addr: 'ул. Московская, 203', area: 'Октябрьский р-н', ago: '3 дня назад', when: '12 ноября', st: 'delivered',
+        items: [it('Сахар, 1 кг', 30, 82, 'sugar')] }
+    ]
+  };
+  const filterOf = { agent: 'all', dist: 'all' };
+  const detailId = { agent: 'a-order', dist: 'd-order' };
+  const open = { agent: null, dist: null };   // номер открытого заказа
+  let declining = false, reason = REASONS[0];
+
+  const total = o => o.items.reduce((s, i) => s + i.q * i.p, 0);
+  const changed = o => o.items.some(i => i.q !== i.q0);
+  const summary = o => o.items.filter(i => i.q > 0).map(i => i.name.split(', ')[0] + ' × ' + i.q).join(', ');
+  const find = (r, n) => orders[r].find(o => o.n === n);
+  const pill = st => '<span class="pill ' + ST[st][0] + '">' + ST[st][1] + '</span>';
+  const inFilter = (f, o) => f === 'all' || (f === 'new' && o.st === 'new') ||
+    (f === 'work' && (o.st === 'confirmed' || o.st === 'delivering')) ||
+    (f === 'done' && (o.st === 'delivered' || o.st === 'rejected'));
+
+  // Карточка заказа в списке: нажатие открывает заказ; новые — с зелёным оттенком
+  function orderButton(r, o) {
+    return '<button class="card rise order-open' + (o.st === 'new' ? ' is-new' : '') + '" data-open="' + r + ':' + o.n + '">' +
+      '<span class="between"><span class="bold" style="font-size:15px">' + o.shop + '</span>' + pill(o.st) + '</span>' +
+      '<span class="small muted">№ ' + o.n + ' · ' + o.area + ' · ' + o.ago + '</span>' +
+      '<span class="between"><span class="small o-sum">' + summary(o) + '</span><span class="bold" style="font-size:16px;white-space:nowrap;font-variant-numeric:tabular-nums">' + fmt(total(o)) + ' сом</span></span></button>';
+  }
+
+  function renderList(r) {
+    const list = $('#' + r + '-order-list');
+    const shown = orders[r].filter(o => inFilter(filterOf[r], o)).sort((a, b) => ORDER[a.st] - ORDER[b.st]);
+    list.innerHTML = shown.length ? shown.map(o => orderButton(r, o)).join('')
+      : '<span class="muted" style="text-align:center;padding:32px 0">Здесь пока пусто</span>';
+    const newN = orders[r].filter(o => o.st === 'new').length;
+    $$('.' + r + '-badge').forEach(b => { b.textContent = newN; b.hidden = newN === 0; });
+    $$('.' + r + '-new-n').forEach(e => e.textContent = newN);
+  }
+
+  // Агент: что везти завтра (подтверждённые и в пути)
+  function renderRoute() {
+    const todo = orders.agent.filter(o => o.st === 'confirmed' || o.st === 'delivering');
+    $$('.route-n').forEach(e => e.textContent = todo.length);
+    $$('.route-sum').forEach(e => e.textContent = fmt(todo.reduce((s, o) => s + total(o), 0)));
+    $('#route-list').innerHTML = todo.length ? todo.map(o => orderButton('agent', o)).join('')
+      : '<span class="muted" style="text-align:center;padding:32px 0">На завтра доставок нет</span>';
+  }
+
+  function renderAll() { renderList('agent'); renderList('dist'); renderRoute(); }
+
+  // Строка товара в заказе. В новом заказе количество можно уменьшить (товара меньше, чем заказали).
+  function itemRow(o, i, k) {
+    const head = '<div class="row" style="gap:10px">' + pic(i.img, 'sm') + '<span class="grow"><span class="name" style="font-size:14px">' + i.name + '</span>';
+    if (o.st === 'new' && !declining) {
+      return head + '<span class="xs muted">' + i.p + ' сом × ' + i.q + ' = ' + fmt(i.q * i.p) + ' сом</span></span><span class="stepper sm">' +
+        '<button type="button" data-step="' + k + ':-1" aria-label="Меньше"' + (i.q ? '' : ' disabled') + '>−</button><input class="qin" type="number" inputmode="numeric" min="0" max="' + i.q0 + '" value="' + i.q + '" data-qk="' + k + '" aria-label="Количество">' +
+        '<button type="button" data-step="' + k + ':1" aria-label="Больше"' + (i.q < i.q0 ? '' : ' disabled') + '>+</button></span></div>';
+    }
+    if (!i.q) return '';
+    return head + '<span class="xs muted">' + i.q + ' шт × ' + i.p + ' сом' + (i.q < i.q0 ? ' · заказано ' + i.q0 : '') + '</span></span>' +
+      '<span class="bold" style="font-variant-numeric:tabular-nums">' + fmt(i.q * i.p) + ' сом</span></div>';
+  }
+
+  function renderDetail(r, still) {
+    const o = find(r, open[r]), scr = $('#' + detailId[r]);
+    $('.order-title', scr).textContent = 'Заказ № ' + o.n;
+    let html =
+      '<div class="card rise"><div class="between" style="align-items:flex-start"><div class="grow">' +
+      '<span class="h2">' + o.shop + '</span><span class="small muted">' + o.addr + ' · ' + o.area + '</span></div>' + pill(o.st) + '</div>' +
+      '<button type="button" class="btn ghost" data-toast="Звоним в ' + o.shop.replace(/"/g, '') + '" style="height:44px">Позвонить в магазин</button></div>' +
+      '<div class="card rise"><span class="h2">Товары</span>' +
+      o.items.map((i, k) => itemRow(o, i, k)).join('') +
+      '<div class="divider"></div>' +
+      '<div class="between"><span class="bold" style="font-size:15px">Итого</span><span class="price" style="font-size:20px">' + fmt(total(o)) + ' сом</span></div>' +
+      '<div class="between small"><span class="muted">Оплата</span><span class="bold">При получении</span></div>' +
+      '<div class="between small"><span class="muted">Доставка</span><span class="bold">' + o.when + '</span></div></div>';
+    if (o.st !== 'new' && o.st !== 'rejected') {
+      html += '<button class="card row rise" data-invoice="' + r + ':' + o.n + '" style="flex-direction:row;padding:14px 16px;border:none;text-align:left">' +
+        '<span class="thumb" style="width:44px;height:44px;background:#FDECEC;color:#B42318"><svg class="ic"><use href="#i-pdf"/></svg></span>' +
+        '<span class="grow"><span class="bold" style="font-size:15px">Накладная № ' + o.n + '.pdf</span><span class="small muted">Открыть или отправить магазину</span></span>' +
+        '<svg class="ic" style="color:var(--muted);width:20px;height:20px"><use href="#i-next"/></svg></button>';
+    }
+    if (o.st === 'new' && declining) {
+      html += '<div class="card rise" style="border:2px solid #F4C7C3"><span class="h2">Почему отклоняете?</span>' +
+        '<span class="small muted">Магазин увидит причину</span><div class="chips">' +
+        REASONS.map(x => '<button type="button" class="chip' + (x === reason ? ' on' : '') + '" data-reason="' + x + '">' + x + '</button>').join('') +
+        '</div></div>';
+    }
+    $('.order-body', scr).innerHTML = still ? html.replace(/ rise/g, '') : html;
+
+    const bar = $('.order-bar', scr);
+    if (o.st === 'new' && !declining) {
+      bar.innerHTML = '<button class="btn lg ghost" data-act="decline" style="flex:1;width:auto">Отклонить</button>' +
+                      '<button class="btn lg" data-act="accept" style="flex:1.4;width:auto"' + (total(o) ? '' : ' disabled') + '>' +
+                      (changed(o) ? 'Принять с изменениями' : 'Принять заказ') + '</button>';
+    } else if (o.st === 'new') {
+      bar.innerHTML = '<button class="btn lg ghost" data-act="cancel-decline" style="flex:1;width:auto">Назад</button>' +
+                      '<button class="btn lg danger" data-act="confirm-decline" style="flex:1.4;width:auto">Отклонить заказ</button>';
+    } else if (NEXT[o.st]) {
+      bar.innerHTML = '<button class="btn lg" data-act="next">' + NEXT[o.st][1] + '</button>';
+    } else {
+      bar.innerHTML = '';
+    }
+    bar.hidden = !bar.innerHTML;
+  }
+
+  // Магазин: накладная по прошлому заказу
+  document.addEventListener('click', e => {
+    if (!e.target.closest('[data-old-inv]')) return;
+    pendingInv = { n: '0000', date: '12.11.2026', shop: shopInv.shop, addr: shopInv.addr, releasedBy: 'Агент Нурлан',
+      items: [{ name: 'Кефир 2,5%, 1 л', q: 10, p: 65 }] };
+    go('s-invoice', 'push');
+  });
+
+  // Открыть накладную по заказу агента или дистрибьютора
+  const DATE_OF = { 'вчера': '13.11.2026', '3 дня назад': '11.11.2026' };
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-invoice]');
+    if (!b) return;
+    const [r, n] = b.dataset.invoice.split(':'), o = find(r, n);
+    pendingInv = {
+      n: o.n, date: DATE_OF[o.ago] || '14.11.2026', shop: o.shop, addr: o.addr + ', ' + o.area, items: o.items,
+      releasedBy: r === 'agent' ? 'Торговый агент Азамат' : 'Склад / экспедитор'
+    };
+    go('s-invoice', 'push');
+  });
+
+
+
+  // ===== Остатки магазина: фильтры, 5 самых срочных, заказ у поставщика одной кнопкой =====
+  // [название, фото, осталось шт, поставщик, цена, сколько заказать]
+  const STOCK = [
+    ['Молоко «Белая река» 3,2%, 1 л', 'milk', 4, 'Агент Азамат', 72, 20], ['Кефир 2,5%, 1 л', 'kefir', 0, 'Агент Азамат', 65, 10],
+    ['Сметана 20%, 400 г', 'smetana', 3, 'Агент Азамат', 90, 12], ['Масло сливочное 82%, 200 г', 'butter', 2, 'Агент Азамат', 145, 6],
+    ['Ряженка 4%, 0,5 л', 'kefir', 7, 'Агент Азамат', 68, 10], ['Йогурт питьевой, 0,3 л', 'kefir', 0, 'Агент Азамат', 55, 12],
+    ['Творог 9%, 200 г', 'butter', 5, 'Агент Азамат', 120, 6], ['Молоко 2,5%, 1 л', 'milk', 30, 'Агент Азамат', 68, 20],
+    ['Сок яблочный, 1 л', 'juice', 0, 'Агент Нурлан', 95, 12], ['Сок апельсиновый, 1 л', 'juice', 6, 'Агент Нурлан', 98, 12],
+    ['Лимонад, 1 л', 'juice', 3, 'Агент Нурлан', 70, 12], ['Сок вишнёвый, 1 л', 'juice', 40, 'Агент Нурлан', 99, 12],
+    ['Хлеб белый, 500 г', 'bread', 6, 'Агент Айгерим', 38, 20], ['Батон нарезной', 'bread', 0, 'Агент Айгерим', 35, 20],
+    ['Сахар, 1 кг', 'sugar', 8, 'Агент Айгерим', 82, 10], ['Мука, 2 кг', 'sugar', 2, 'Агент Айгерим', 130, 5],
+    ['Печенье овсяное, 300 г', 'cookie', 4, 'Агент Айгерим', 68, 10], ['Пряники, 400 г', 'cookie', 0, 'Агент Айгерим', 75, 10],
+    ['Рис, 1 кг', 'sugar', 50, 'Агент Айгерим', 110, 10], ['Печенье шоколадное, 250 г', 'cookie', 35, 'Агент Айгерим', 85, 10]
+  ].map(([name, img, left, sup, p, q]) => ({ name, img, left, sup, p, q, ordered: false }));
+  const LOW = 8;   // меньше или равно — «заканчивается»
+  const supOf = x => x.sup;
+  const need = x => x.left <= LOW && !x.ordered;
+  const SF = [['low', 'Заканчивается', x => x.left > 0 && x.left <= LOW], ['out', 'Нет в наличии', x => x.left === 0], ['all', 'Все', () => true]];
+  let stockF = 'low';
+  function stockRow(x) {
+    const st = x.left === 0 ? '<span class="small" style="color:#B42318">Нет в наличии</span>'
+      : '<span class="small ' + (x.left <= LOW ? 'warn' : 'muted') + '">Осталось ' + x.left + ' шт</span>';
+    const act = x.ordered ? '<span class="pill green">Заказано</span>'
+      : x.left <= LOW ? '<button class="btn" data-go="s-product">Заказать</button>' : '';
+    return '<div class="row">' + pic(x.img) + '<div class="grow"><span class="name">' + x.name + '</span>' + st + '</div>' + act + '</div>';
+  }
+  function renderStock() {
+    const fn = SF.find(f => f[0] === stockF)[2], q = ($('#stock-search').value || '').trim().toLowerCase();
+    const list = STOCK.filter(fn).sort((a, b) => a.left - b.left);
+    $$('.stock-filter').forEach(c => c.innerHTML = SF.map(([k, t, f]) =>
+      '<button type="button" class="chip' + (k === stockF ? ' on' : '') + '" data-sf="' + k + '">' + t + '<span class="cnt">' + STOCK.filter(f).length + '</span></button>').join(''));
+    $$('.stock-list').forEach(el => {
+      const lim = +el.dataset.limit || 0, rows = lim ? list.slice(0, lim) : list.filter(x => !q || x.name.toLowerCase().includes(q));
+      el.innerHTML = rows.length ? rows.map(stockRow).join('') : '<span class="small muted">Ничего не найдено</span>';
+    });
+    const more = list.length - 5;
+    $('#stock-more').hidden = more <= 0;
+    $('#stock-more').innerHTML = 'Ещё ' + more + ' ' + (more % 10 === 1 && more % 100 !== 11 ? 'товар' : more % 10 >= 2 && more % 10 <= 4 && (more % 100 < 12 || more % 100 > 14) ? 'товара' : 'товаров') +
+      '<svg class="ic" style="width:18px;height:18px"><use href="#i-next"/></svg>';
+    // Группы по поставщику: что пора заказать
+    const g = {};
+    STOCK.filter(need).forEach(x => (g[supOf(x)] = g[supOf(x)] || []).push(x));
+    const keys = Object.keys(g);
+    $('#sup-groups').innerHTML = keys.length ? keys.map(k => {
+      const sum = g[k].reduce((s, x) => s + x.p * x.q, 0);
+      return '<div class="card row rise" role="button" tabindex="0" data-cart="' + esc(k) + '" style="flex-direction:row;padding:14px;cursor:pointer"><span class="grow"><span class="bold" style="font-size:15px">' + k + '</span>' +
+        '<span class="small muted">' + g[k].length + ' ' + plural(g[k].length, 'товар', 'товара', 'товаров') + ' на ' + fmt(sum) + ' сом</span></span>' +
+        '<span class="btn" style="display:inline-flex;align-items:center">Заказать всё</span></div>';
+    }).join('') : '<span class="small muted">Всё заказано</span>';
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-sf]');
+    if (b) { stockF = b.dataset.sf; renderStock(); }
+  });
+  $('#stock-search').addEventListener('input', renderStock);
+  // Корзина поставщика: товары, которые пора заказать; количество можно менять, товар — убрать
+  const plural = (n, a, b, c) => n % 10 === 1 && n % 100 !== 11 ? a : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? b : c;
+  let cartSup = null, cart = [];
+  function renderCart() {
+    $('#cart-list').innerHTML = cart.length ? cart.map((c, k) => '<div class="row" style="gap:10px">' + pic(c.x.img, 'sm') +
+      '<span class="grow"><span class="name" style="font-size:14px">' + c.x.name + '</span><span class="xs muted">' + c.x.p + ' сом × ' + c.q + ' = ' + fmt(c.x.p * c.q) + ' сом</span></span>' +
+      '<span class="stepper sm"><button type="button" data-cq="' + k + ':-1" aria-label="Меньше"' + (c.q > 1 ? '' : ' disabled') + '>−</button><input class="qin" type="number" inputmode="numeric" min="1" value="' + c.q + '" data-cin="' + k + '" aria-label="Количество">' +
+      '<button type="button" data-cq="' + k + ':1" aria-label="Больше">+</button></span>' +
+      '<button type="button" class="eye" data-cdel="' + k + '" aria-label="Убрать из заказа"><svg class="ic"><use href="#i-trash"/></svg></button></div>').join('')
+      : '<span class="small muted">Корзина пуста</span>';
+    const sum = cart.reduce((s, c) => s + c.q * c.x.p, 0);
+    $('#cart-total').textContent = fmt(sum) + ' сом';
+    $('#cart-send').disabled = !cart.length;
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-cart]');
+    if (!b) return;
+    cartSup = b.dataset.cart;
+    cart = STOCK.filter(x => need(x) && supOf(x) === cartSup).map(x => ({ x, q: x.q }));
+    $('#cart-title').textContent = cartSup;
+    renderCart();
+    $('#cart-sheet').hidden = false;
+  });
+  $('#cart-list').addEventListener('click', e => {
+    const st = e.target.closest('[data-cq]'), del = e.target.closest('[data-cdel]');
+    if (st) { const [k, d] = st.dataset.cq.split(':'); cart[+k].q = Math.max(1, cart[+k].q + (+d)); renderCart(); }
+    if (del) { cart.splice(+del.dataset.cdel, 1); renderCart(); }
+  });
+  $('#cart-list').addEventListener('change', e => {
+    const inp = e.target.closest('[data-cin]');
+    if (inp) { cart[+inp.dataset.cin].q = Math.max(1, parseInt(inp.value, 10) || 1); renderCart(); }
+  });
+  // ===== Заказы магазина: одна карточка для всех; шаги — внутри заказа; накладная — после подтверждения =====
+  const SST = { sent: ['warn', 'Отправлен'], confirmed: ['green', 'Подтверждён'], delivering: ['amber', 'В пути'], delivered: ['grey', 'Доставлен'] };
+  const SSTEP = ['sent', 'confirmed', 'delivering', 'delivered'];
+  const spill = st => '<span class="pill ' + SST[st][0] + '">' + SST[st][1] + '</span>';
+  const shopOrders = [
+    { n: '0000', sup: 'Агент Нурлан', date: '12 ноября', when: '12 ноября', st: 'delivered', items: [{ name: 'Кефир 2,5%, 1 л', q: 10, p: 65, img: 'kefir' }] },
+    { n: '0001', sup: 'Агент Азамат', date: 'сегодня', when: 'завтра до 12:00', st: 'confirmed', items: [{ name: 'Молоко «Белая река» 3,2%, 1 л', q: 20, p: 72, img: 'milk' }] }
+  ];
+  let shopN = 2;
+  const osum = o => o.items.reduce((s, i) => s + i.q * i.p, 0);
+  const hasInv = o => o.st !== 'sent';
+  const invRow = (o, k) => hasInv(o)
+    ? '<button class="list-item" data-new-inv="' + k + '" style="padding:10px 0 0;border-top:1px solid var(--line);margin-top:4px"><svg class="ic" style="color:#B42318"><use href="#i-pdf"/></svg>' +
+      '<span class="grow">Накладная № ' + o.n + '</span><svg class="ic chev"><use href="#i-next"/></svg></button>'
+    : '<span class="xs muted" style="padding-top:8px;border-top:1px solid var(--line);margin-top:4px">Накладная появится, когда поставщик подтвердит заказ</span>';
+  function renderShopOrders() {
+    $('#s-order-list').innerHTML = shopOrders.map((o, k) =>
+      '<div class="card rise" role="button" tabindex="0" data-sorder="' + k + '" style="cursor:pointer;gap:4px">' +
+      '<div class="between"><span class="bold" style="font-size:15px">' + o.sup + '</span>' + spill(o.st) + '</div>' +
+      '<span class="small muted">№ ' + o.n + ', ' + o.date + '</span>' +
+      '<div class="between"><span class="small">' + o.items.length + ' ' + plural(o.items.length, 'товар', 'товара', 'товаров') + '</span>' +
+      '<span class="bold" style="font-size:16px">' + fmt(osum(o)) + ' сом</span></div>' + invRow(o, k) + '</div>').reverse().join('');
+    if (current_id === 's-order' && openSO != null) renderShopOrder(openSO);
+  }
+  let openSO = null;
+  function renderShopOrder(k) {
+    const o = shopOrders[k], at = SSTEP.indexOf(o.st);
+    const names = ['Заказ отправлен', 'Поставщик подтвердил', 'В пути', 'Получен и оплачен'];
+    $('#so-title').textContent = 'Заказ № ' + o.n;
+    $('#so-body').innerHTML =
+      '<div class="card rise" style="gap:4px"><div class="between"><span class="h2">' + o.sup + '</span>' + spill(o.st) + '</div><span class="small muted">№ ' + o.n + ', ' + o.date + '</span>' +
+      '<div class="steps" style="padding-top:8px">' + names.map((t, j) =>
+        '<div class="step' + (j <= at ? ' done' : '') + '"><div class="mark"><span class="circle"></span>' + (j < 3 ? '<span class="line"></span>' : '') + '</div>' +
+        '<div class="grow"><span class="name" style="font-size:14px">' + t + '</span>' + (j === 2 ? '<span class="xs muted">Доставка ' + o.when + '</span>' : '') + '</div></div>').join('') + '</div></div>' +
+      '<div class="card rise" style="gap:10px"><span class="h2">Товары</span>' + o.items.map(i =>
+        '<div class="row" style="gap:10px">' + (i.img ? pic(i.img, 'sm') : '') + '<span class="grow"><span class="name" style="font-size:14px">' + i.name + '</span>' +
+        '<span class="xs muted">' + i.q + ' шт × ' + i.p + ' сом</span></span><span class="bold" style="white-space:nowrap">' + fmt(i.q * i.p) + ' сом</span></div>').join('') +
+      '<div class="divider"></div><div class="between"><span class="bold" style="font-size:15px">Итого</span><span class="price">' + fmt(osum(o)) + ' сом</span></div>' + invRow(o, k) + '</div>';
+  }
+  document.addEventListener('click', e => {
+    const inv = e.target.closest('[data-new-inv]');
+    if (inv) {
+      const o = shopOrders[+inv.dataset.newInv];
+      pendingInv = { n: o.n, date: o.date === 'сегодня' ? '14.11.2026' : '12.11.2026', shop: shopInv.shop, addr: shopInv.addr, releasedBy: o.sup, items: o.items };
+      go('s-invoice', 'push'); return;
+    }
+    const c = e.target.closest('[data-sorder]');
+    if (c) { openSO = +c.dataset.sorder; renderShopOrder(openSO); go('s-order', 'push'); }
+  });
+  function addShopOrder(sup, when, items) {
+    const o = { n: String(shopN++).padStart(4, '0'), sup, date: 'сегодня', when, st: 'sent', items };
+    shopOrders.push(o); renderShopOrders();
+    // В прототипе поставщик подтверждает через несколько секунд
+    setTimeout(() => { o.st = 'confirmed'; renderShopOrders(); toast('Заказ № ' + o.n + ' подтверждён · накладная готова'); }, 5000);
+    return o;
+  }
+  renderShopOrders();
+  $('#cart-send').addEventListener('click', () => {
+    cart.forEach(c => c.x.ordered = true);
+    const o = addShopOrder(cartSup, 'завтра до 12:00', cart.map(c => ({ name: c.x.name, q: c.q, p: c.x.p, img: c.x.img })));
+    $('#cart-sheet').hidden = true;
+    renderStock();
+    toast('Заказ № ' + o.n + ' отправлен · ' + cartSup);
+  });
+  $('#cart-sheet').addEventListener('click', e => { if (e.target.id === 'cart-sheet') $('#cart-sheet').hidden = true; });
+  renderStock();
+
+  // ===== Выбор версии (Тест 1 — полная, Тест 2 — без каталога и других поставщиков) =====
+  $$('[data-ver]').forEach(b => b.addEventListener('click', () => {
+    const lite = b.dataset.ver === 'lite';
+    document.body.classList.toggle('lite', lite);
+    $('#ver-name').textContent = lite ? 'Тест 2' : 'Тест 1';
+    lastScreen.shop = 's-home';
+    renderStock();
+    go('auth', 'fade');
+  }));
+  $('#ver-change').addEventListener('click', () => go('version', 'fade'));
+
+  // ===== Вход и регистрация (логика из ветки Hades, дизайн наш) =====
+  let accType = 'shop';
+  function authMode(reg) {
+    $('#login-form').hidden = reg; $('#reg-form').hidden = !reg;
+    $('#to-reg').hidden = reg; $('#to-login').hidden = !reg;
+    $('#auth-title').textContent = reg ? 'Регистрация' : 'Вход';
+    $('#auth-sub').textContent = reg ? 'Добро пожаловать в B2B-платформу!' : 'Добро пожаловать!';
+  }
+  $$('[data-auth]').forEach(b => b.addEventListener('click', () => authMode(b.dataset.auth === 'reg')));
+  $('#auth-type').addEventListener('click', e => {
+    const b = e.target.closest('[data-acc]');
+    if (!b) return;
+    accType = b.dataset.acc;
+    $$('#auth-type button').forEach(x => x.classList.toggle('on', x === b));
+    const shop = accType === 'shop';
+    $('#reg-name').placeholder = shop ? 'Название магазина' : 'Название поставщика';
+    $('#reg-addr').placeholder = shop ? 'Адрес магазина / доставки' : 'Адрес склада';
+  });
+  // ИНН: только цифры, ровно 14
+  $$('[data-digits]').forEach(i => i.addEventListener('input', () => {
+    const n = +i.dataset.digits;
+    i.value = i.value.replace(/\D/g, '').slice(0, n);
+    i.setCustomValidity(i.value && i.value.length !== n ? 'Введите ровно ' + n + ' цифр' : '');
+  }));
+  // Телефон: 9 цифр, формат 555 123 456
+  $$('[data-phone]').forEach(i => i.addEventListener('input', () => {
+    const d = i.value.replace(/\D/g, '').slice(0, 9);
+    i.value = d.replace(/(\d{3})(?=\d)/g, '$1 ');
+    i.setCustomValidity(d && d.length !== 9 ? 'Введите ровно 9 цифр' : '');
+  }));
+  // Глаз: показать все пароли формы
+  $$('[data-eye]').forEach(b => b.addEventListener('click', () => {
+    const show = b.getAttribute('aria-pressed') !== 'true';
+    $$('[data-pw]', b.closest('form')).forEach(i => i.type = show ? 'text' : 'password');
+    b.setAttribute('aria-pressed', show); b.classList.toggle('on', show);
+    b.setAttribute('aria-label', show ? 'Скрыть пароль' : 'Показать пароль');
+  }));
+  const checkPw2 = () => $('#reg-pw2').setCustomValidity($('#reg-pw2').value && $('#reg-pw2').value !== $('#reg-pw').value ? 'Пароли не совпадают' : '');
+  $('#reg-pw').addEventListener('input', checkPw2); $('#reg-pw2').addEventListener('input', checkPw2);
+  // Согласие: перед галочкой — показать документы
+  const showAgr = k => {
+    $$('#agree-tabs button').forEach(x => x.classList.toggle('on', x.dataset.agr === k));
+    $('#agree-body').replaceChildren($('#doc-' + k).content.cloneNode(true));
+    $('#agree-body').scrollTop = 0;
+  };
+  const openAgree = () => { showAgr('user_agreement_zakup_kg'); $('#agree-sheet').hidden = false; };
+  $('#reg-agree').addEventListener('click', e => { if ($('#reg-agree').checked) { e.preventDefault(); openAgree(); } });
+  $('[data-agree-open]').addEventListener('click', openAgree);
+  $('#agree-tabs').addEventListener('click', e => { const b = e.target.closest('[data-agr]'); if (b) showAgr(b.dataset.agr); });
+  $('#agree-accept').addEventListener('click', () => { $('#reg-agree').checked = true; $('#agree-sheet').hidden = true; });
+  $('#agree-sheet').addEventListener('click', e => { if (e.target.id === 'agree-sheet') $('#agree-sheet').hidden = true; });
+  // Вход: магазин → кабинет магазина, поставщик → кабинет дистрибьютора
+  const enter = (fm, msg) => {
+    if (!fm.reportValidity()) return;
+    setRole(accType === 'shop' ? 'shop' : 'dist');
+    toast(msg);
+  };
+  // Тестовый аккаунт для входа (только прототип)
+  const TEST = { phone: '500991620', pw: '1234' };
+  $('#login-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const fm = e.target, ph = $('[data-phone]', fm).value.replace(/\D/g, ''), pw = $('[data-pw]', fm).value;
+    if (fm.checkValidity() && (ph !== TEST.phone || pw !== TEST.pw)) { toast('Неверный номер или пароль'); return; }
+    enter(fm, 'Добро пожаловать!');
+  });
+  $('#reg-form').addEventListener('submit', e => { e.preventDefault(); checkPw2(); enter(e.target, 'Регистрация прошла успешно'); });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('[data-logout]')) return;
+    $('#logout-sheet').hidden = false;
+  });
+  $('#logout-no').addEventListener('click', () => $('#logout-sheet').hidden = true);
+  $('#logout-sheet').addEventListener('click', e => { if (e.target.id === 'logout-sheet') $('#logout-sheet').hidden = true; });
+  $('#logout-yes').addEventListener('click', () => {
+    $('#logout-sheet').hidden = true;
+    $$('#auth form').forEach(fm => fm.reset());
+    authMode(false);
+    go('auth', 'fade');
+  });
+
+  // Профиль агента: список накладных по принятым заказам
+  function renderInvoiceList() {
+    const list = orders.agent.filter(o => o.st !== 'new' && o.st !== 'rejected');
+    $('#a-inv-list').innerHTML = list.length ? list.map(o =>
+      '<div class="card row" role="button" tabindex="0" data-invoice="agent:' + o.n + '" style="flex-direction:row;padding:14px;cursor:pointer">' +
+      '<span class="thumb" style="width:44px;height:44px;background:var(--green-bg);color:var(--green)"><svg class="ic"><use href="#i-pdf"/></svg></span>' +
+      '<span class="grow"><span class="bold" style="font-size:15px">№ ' + o.n + ' · ' + o.shop + '</span>' +
+      '<span class="small muted">' + (DATE_OF[o.ago] || '14.11.2026') + ' · ' + fmt(total(o)) + ' сом</span></span></div>').join('')
+      : '<span class="small muted">Накладные появятся после принятия заказов</span>';
+  }
+  // Договоры и правила: текст документа берётся из <template>
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-doc]');
+    if (!b) return;
+    $('#doc-title').textContent = b.querySelector('.grow').textContent;
+    $('#doc-body').replaceChildren($('#doc-' + b.dataset.doc).content.cloneNode(true));
+    $('#doc-body').scrollTop = 0;
+    go('doc-view', 'push');
+  });
+  $$('.settings-form').forEach(fm => fm.addEventListener('submit', e => {
+    e.preventDefault();
+    toast('Сохранено');
+    go(history.pop() || homeOf[role], 'back');
+  }));
+  $('#a-settings-form').addEventListener('submit', e => {
+    e.preventDefault();
+    toast('Сохранено');
+    go(history.pop() || homeOf[role], 'back');
+  });
+
+  // Открыть заказ из списка
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-open]');
+    if (!b) return;
+    const [r, n] = b.dataset.open.split(':');
+    open[r] = n; declining = false; reason = REASONS[0];
+    renderDetail(r);
+    go(detailId[r], 'push');
+  });
+
+  // Ввод количества руками в новом заказе (не больше, чем заказал магазин)
+  ['agent', 'dist'].forEach(r => $('#' + detailId[r]).addEventListener('change', e => {
+    const inp = e.target.closest('[data-qk]');
+    if (!inp) return;
+    const i = find(r, open[r]).items[+inp.dataset.qk];
+    i.q = Math.max(0, Math.min(i.q0, parseInt(inp.value, 10) || 0));
+    renderDetail(r, true);
+  }));
+
+  // Действия внутри карточки заказа
+  ['agent', 'dist'].forEach(r => {
+    const scr = $('#' + detailId[r]);
+    scr.addEventListener('click', e => {
+      const stp = e.target.closest('[data-step]');
+      if (stp) {
+        const [k, d] = stp.dataset.step.split(':'), i = find(r, open[r]).items[+k];
+        i.q = Math.max(0, Math.min(i.q0, i.q + (+d)));
+        renderDetail(r, true); return;
+      }
+      const rs = e.target.closest('[data-reason]');
+      if (rs) { reason = rs.dataset.reason; renderDetail(r, true); return; }
+      const a = e.target.closest('[data-act]');
+      if (!a) return;
+      const o = find(r, open[r]);
+      if (a.dataset.act === 'accept') {
+        o.st = 'confirmed';
+        toast('Заказ № ' + o.n + (changed(o) ? ' принят с изменениями' : ' принят') + ' · магазин получил уведомление');
+        renderAll(); go(history.pop() || homeOf[role], 'back');
+      } else if (a.dataset.act === 'decline') {
+        declining = true; renderDetail(r);
+      } else if (a.dataset.act === 'cancel-decline') {
+        declining = false; renderDetail(r);
+      } else if (a.dataset.act === 'confirm-decline') {
+        o.st = 'rejected'; declining = false;
+        toast('Заказ отклонён: ' + reason.toLowerCase());
+        renderAll(); go(history.pop() || homeOf[role], 'back');
+      } else if (a.dataset.act === 'next') {
+        const [st, , msg] = NEXT[o.st];
+        o.st = st; toast(msg);
+        renderAll(); renderDetail(r);
+      }
+    });
+  });
+
+  // Фильтры списков заказов
+  $$('.filter').forEach(f => f.addEventListener('click', e => {
+    const c = e.target.closest('[data-f]');
+    if (!c) return;
+    filterOf[f.dataset.roleList] = c.dataset.f;
+    renderList(f.dataset.roleList);
+  }));
+
+  // ===== Дистрибьютор: магазины по районам филиала =====
+  const stores = [
+    ['Магазин «Достук»', 'Октябрьский', 'заказ сегодня'],
+    ['Магазин «Асель»', 'Октябрьский', 'заказ 3 дня назад'],
+    ['Минимаркет «Ала-Тоо»', 'Свердловский', 'заказ сегодня'],
+    ['Магазин «Айгуль»', 'Свердловский', 'заказ на прошлой неделе'],
+    ['Продукты «Нур»', 'Первомайский', 'заказ вчера'],
+    ['Магазин «Береке»', 'Ленинский', 'заказ вчера'],
+    ['Магазин «Жибек»', 'Ленинский', 'заказ сегодня'],
+    ['Магазин «Ынтымак»', 'Ленинский', 'не заказывал 12 дней']
+  ];
+  let district = 'all';
+  const ADD_STORE = '<button type="button" class="btn lg ghost" data-add-store><svg class="ic"><use href="#i-plus"/></svg>Добавить магазин</button>';
+  function renderStores() {
+    const groups = {};
+    stores.filter(s => district === 'all' || s[1] === district).forEach(s => (groups[s[1]] = groups[s[1]] || []).push(s));
+    $('#d-store-list').innerHTML = Object.keys(groups).map(g =>
+      '<span class="section-h rise">' + g + ' район · ' + groups[g].length + '</span>' +
+      groups[g].map(s => {
+        const late = s[2].startsWith('не');
+        return '<div class="card row rise" style="flex-direction:row;padding:14px">' +
+          '<span class="thumb" style="width:44px;height:44px;background:' + (late ? 'var(--warn-bg);color:var(--warn)' : 'var(--soft)') + '"><svg class="ic"><use href="#i-store"/></svg></span>' +
+          '<span class="grow"><span class="bold" style="font-size:15px">' + esc(s[0]) + '</span><span class="small ' + (late ? 'warn' : 'muted') + '">' + esc(s[3] || 'ул. Боконбаева, 17') + ' · ' + s[2] + '</span></span></div>';
+      }).join('')).join('') + ADD_STORE;
+    $('#d-store-n').textContent = stores.length;
+  }
+  $('#district-filter').addEventListener('click', e => {
+    const c = e.target.closest('[data-d]');
+    if (c) { district = c.dataset.d; renderStores(); }
+  });
+
+  // ===== Дистрибьютор: товар — изменить или добавить =====
+  // Наличие отмечается вручную: склад поставщика на старте не подключаем
+  let editing = null;   // карточка товара, которую меняем; null — новый товар
+  let newPhoto = null;  // адрес только что выбранного фото
+  const NO_PHOTO = '<svg class="ic"><use href="#i-camera"/></svg><span>Фото не добавлено</span>';
+  function showPhoto(html) { $('#d-photo').innerHTML = html; }
+  $$('.photo-input').forEach(inp => inp.addEventListener('change', () => {
+    const file = inp.files && inp.files[0];
+    if (!file) return;
+    newPhoto = URL.createObjectURL(file);
+    showPhoto('<img alt="Фото товара" src="' + newPhoto + '">');
+    inp.value = '';
+  }));
+  function setAvail(on) {
+    const t = $('#d-avail');
+    t.classList.toggle('off', !on); t.setAttribute('aria-checked', on);
+    $('#d-avail-hint').textContent = on ? 'Магазины видят товар и могут заказать' : 'Товар скрыт, магазины его не видят';
+  }
+  function writeProduct(b, name, p, m, on) {
+    $('.p-name', b).textContent = name;
+    $('.p-price', b).textContent = p;
+    $('.p-min', b).textContent = m;
+    $('.p-avail', b).textContent = on ? 'в наличии' : 'нет в наличии';
+    $('.p-meta', b).classList.toggle('warn', !on); $('.p-meta', b).classList.toggle('muted', on);
+    $('.price', b).classList.toggle('muted', !on);
+  }
+  let editList = null;  // список, из которого открыли редактор (агента или дистрибьютора)
+  $$('#d-product-list, #a-product-list').forEach(list => list.addEventListener('click', e => {
+    const b = e.target.closest('[data-edit],[data-new]');
+    if (!b) return;
+    editList = list;
+    editing = b.hasAttribute('data-edit') ? b : null;
+    $('#d-product-title').textContent = editing ? 'Изменить товар' : 'Новый товар';
+    $('#d-name').value = editing ? $('.p-name', b).textContent : '';
+    $('#d-price').value = editing ? $('.p-price', b).textContent : '';
+    $('#d-min').value = editing ? $('.p-min', b).textContent : '';
+    $('#d-save').textContent = editing ? 'Сохранить' : 'Добавить товар';
+    setAvail(editing ? $('.p-avail', b).textContent === 'в наличии' : true);
+    newPhoto = null;
+    if (editing) {
+      const src = $('.pimg', b).innerHTML;
+      showPhoto(src.includes('<img') ? src : src.replace('<svg ', '<svg class="pk" '));
+    } else showPhoto(NO_PHOTO);
+    go('d-product', 'push');
+  }));
+  $('#d-avail').addEventListener('click', () => setAvail($('#d-avail').classList.contains('off')));
+  $('#d-price-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const name = $('#d-name').value.trim(), p = parseInt($('#d-price').value, 10), m = parseInt($('#d-min').value, 10) || 1;
+    const on = !$('#d-avail').classList.contains('off');
+    if (!name || !(p > 0)) { toast('Укажите название и цену'); return; }
+    if (!editing) {
+      const b = document.createElement('button');
+      b.className = 'card row rise prod'; b.setAttribute('data-edit', '');
+      b.style.cssText = 'flex-direction:row;padding:14px;border:none;text-align:left';
+      b.innerHTML = '<span class="pimg"><svg class="ic"><use href="#i-box"/></svg></span>' +
+        '<span class="grow"><span class="name p-name"></span><span class="small p-meta">от <span class="p-min"></span> шт · <span class="p-avail"></span></span></span>' +
+        '<span class="price"><span class="p-price"></span> сом</span>';
+      $('[data-new]', editList).before(b);
+      writeProduct(b, name, p, m, on);
+      if (newPhoto) $('.pimg', b).innerHTML = '<img alt="" src="' + newPhoto + '">';
+      toast(newPhoto ? 'Товар с фото добавлен · магазины уже видят его' : 'Товар добавлен без фото');
+    } else {
+      writeProduct(editing, name, p, m, on);
+      if (newPhoto) $('.pimg', editing).innerHTML = '<img alt="" src="' + newPhoto + '">';
+      toast('Сохранено · магазины увидят изменения сразу');
+    }
+    go(history.pop() || 'd-catalog', 'back');
+  });
+
+  // Новый магазин: одна форма для агента и дистрибьютора
+  document.addEventListener('click', e => {
+    if (!e.target.closest('[data-add-store]')) return;
+    $('#store-form').reset();
+    $('#ns-sugg').hidden = true;
+    $('#ns-district').hidden = role !== 'dist';
+    go('store-new', 'push');
+  });
+  // Магазины, которые уже зарегистрированы в Zakup.KG: [название, адрес, телефон, район]
+  const REG = [
+    ['Магазин «Достук»', 'ул. Ахунбаева, 112', '+996 772 30 15 44', 'Октябрьский'],
+    ['Магазин «Береке»', 'ул. Токтогула, 45', '+996 550 61 07 83', 'Ленинский'],
+    ['Магазин «Жибек»', 'ул. Байтик Баатыра, 7', '+996 707 99 40 12', 'Ленинский'],
+    ['Минимаркет «Айдай»', 'ул. Ибраимова, 29', '+996 555 12 34 56', 'Свердловский'],
+    ['Продукты «Салам»', 'ул. Жибек Жолу, 310', '+996 700 48 21 90', 'Первомайский'],
+    ['Магазин «Тумар»', 'ул. Фрунзе, 88', '+996 772 30 15 44', 'Октябрьский']
+  ];
+  const myStores = () => role === 'dist' ? stores.map(x => x[0]) : $$('#a-store-list .card .bold').map(x => x.textContent);
+  const norm = t => t.toLowerCase().replace(/[«»"]/g, '');
+  $('#ns-name').addEventListener('input', () => {
+    const q = norm($('#ns-name').value.trim()), box = $('#ns-sugg'), mine = myStores();
+    const hits = q ? REG.filter(x => norm(x[0]).includes(q)) : [];
+    box.innerHTML = hits.map(x => {
+      const have = mine.includes(x[0]);
+      return '<button type="button" class="list-item" data-reg="' + REG.indexOf(x) + '"' + (have ? ' disabled' : '') + '>' +
+        '<span class="grow"><span class="bold" style="font-size:14px">' + x[0] + '</span><span class="xs muted">' + (have ? 'уже в вашем списке' : x[1] + ' · ' + x[3] + ' р-н') + '</span></span></button>';
+    }).join('');
+    box.hidden = !hits.length;
+  });
+  $('#ns-sugg').addEventListener('click', e => {
+    const b = e.target.closest('[data-reg]');
+    if (!b) return;
+    const x = REG[+b.dataset.reg];
+    $('#ns-name').value = x[0]; $('#ns-addr').value = x[1]; $('#ns-phone').value = x[2];
+    $$('#ns-district .chip').forEach(c => c.classList.toggle('on', c.dataset.d === x[3]));
+    $('#ns-sugg').hidden = true;
+  });
+  $('#store-form').addEventListener('submit', e => {
+    e.preventDefault();
+    if (myStores().includes($('#ns-name').value.trim())) { toast('Этот магазин уже в вашем списке'); return; }
+    const name = $('#ns-name').value.trim(), addr = $('#ns-addr').value.trim() || 'пр. Чуй, 154';
+    if (!name) { toast('Укажите название магазина'); return; }
+    if (role === 'dist') {
+      stores.push([name, $('#ns-district .chip.on').dataset.d, 'новый', addr]);
+      renderStores();
+    } else {
+      const c = document.createElement('div');
+      c.className = 'card row'; c.style.cssText = 'flex-direction:row;padding:14px';
+      c.innerHTML = '<span class="thumb" style="width:44px;height:44px;background:var(--green-bg);color:var(--green)"><svg class="ic"><use href="#i-store"/></svg></span>' +
+        '<span class="grow"><span class="bold" style="font-size:15px">' + esc(name) + '</span><span class="small muted">' + esc(addr) + ' · новый</span></span>';
+      $('#a-store-list [data-add-store]').before(c);
+      $$('.a-store-n').forEach(x => x.textContent = $$('#a-store-list .card').length);
+    }
+    toast('Магазин добавлен');
+    go(history.pop() || homeOf[role], 'back');
+  });
+
+  // Профиль: язык
+  $$('.lang-seg').forEach(g => g.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b || b.classList.contains('on')) return;
+    $$('button', g).forEach(x => x.classList.toggle('on', x === b));
+    toast(b.textContent.startsWith('Кыр') ? 'Кыргызский язык — в следующей версии' : 'Язык: русский');
+  }));
+
+  renderAll();
+  renderStores();
+  // Стартовая анимация
+  $('#s-home').classList.add('anim');
+})();
+</script>
+
+</body></html>
